@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <server port="14501" />
-    <userstat dir="/home/infinity/.wolfstat" filter="wolf??" />
+    <userstat dir="/home/infinity/.wolfstat" filter="wolf[012][0-9].ncbr.muni.cz" />
     <watcher logname="/opt/wolf-stat-server/2.0/log/wolf-stat-server.log" />
 </config>
