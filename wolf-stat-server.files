@@ -1,0 +1,15 @@
+CMakeClean.sh
+CMakeLists.txt
+etc/CMakeLists.txt
+etc/wolf-stat-server.xml
+src/CMakeLists.txt
+src/bin/CMakeLists.txt
+src/bin/wolf-stat-server/CMakeLists.txt
+src/bin/wolf-stat-server/ServerWatcher.cpp
+src/bin/wolf-stat-server/ServerWatcher.hpp
+src/bin/wolf-stat-server/WolfStatOptions.cpp
+src/bin/wolf-stat-server/WolfStatOptions.hpp
+src/bin/wolf-stat-server/WolfStatServer.cpp
+src/bin/wolf-stat-server/WolfStatServer.hpp
+src/bin/wolf-stat-server/_Error.cpp
+src/bin/wolf-stat-server/_ListLoggedUsers.cpp
