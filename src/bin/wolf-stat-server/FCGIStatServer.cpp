@@ -113,7 +113,7 @@ bool CFCGIStatServer::Run(void)
 
     // start servers
     Watcher.StartThread();          // watcher
-    //StatServer.StartThread();             // stat server
+    StatServer.StartThread();       // stat server
     if( StartServer() == false ) {  // fcgi server
         return(false);
     }
@@ -122,8 +122,16 @@ bool CFCGIStatServer::Run(void)
     vout << "Waiting for server termination ..." << endl;
     WaitForServer();
 
+    StatServer.TerminateServer();
+    StatServer.WaitForThread();
+
     Watcher.TerminateThread();
     Watcher.WaitForThread();
+
+    vout << "# Number of client total requests      = " << StatServer.AllRequests << endl;
+    vout << "# Number of client successful requests = " << StatServer.SuccessfulRequests << endl;
+    vout << "# Number of nodes                      = " << Nodes.size() << endl;
+    vout << endl;
 
     return(true);
 }
@@ -267,11 +275,11 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# FCGI Port (fcgiport) = " << FCGIPort << endl;
     vout << "# Stat Port (statport) = " << StatPort << endl;
     vout << "# Max nodes (maxnodes) = " << MaxNodes << endl;
-    vout << "#" << endl;
+    vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
     Watcher.ProcessWatcherControl(vout,p_watcher);
-    vout << "#" << endl;
+    vout << endl;
 
     return(true);
 }

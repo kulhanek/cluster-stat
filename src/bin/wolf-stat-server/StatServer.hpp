@@ -33,12 +33,17 @@ public:
     ///! set server port
     void SetPort(int port);
 
+    //! terminate server, e.g. close socket and termineate thread
+    void TerminateServer(void);
+
+public:
+    int AllRequests;
+    int SuccessfulRequests;
+
 // section of private data -----------------------------------------------------
 private:
     int Port;
     int Socket;
-    int AllRequests;
-    int SuccessfulRequests;
 
 // execute server --------------------------------------------------------------
     //! execute server

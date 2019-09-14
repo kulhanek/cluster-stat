@@ -65,6 +65,14 @@ void CStatServer::SetPort(int port)
     Port = port;
 }
 
+//------------------------------------------------------------------------------
+
+void CStatServer::TerminateServer(void)
+{
+    if( Socket != -1 ) shutdown(Socket, SHUT_RDWR);
+    TerminateThread();
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
@@ -116,7 +124,7 @@ void CStatServer::ExecuteThread(void)
     freeaddrinfo(result); // No longer needed
 
     // server loop
-    while(ThreadTerminated == false) {
+    while( (ThreadTerminated == false) && (Socket != -1) ) {
 
         CStatDatagram           datagram;
         struct sockaddr_storage peer_addr;
