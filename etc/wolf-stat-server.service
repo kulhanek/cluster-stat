@@ -1,0 +1,10 @@
+[Unit]
+Description=WOLF Status FastCGI Server
+
+[Service]
+ExecStart=/opt/wolf-stat-server/3.0/bin/wolf-stat-server
+User=wolfstat
+UMask=077
+
+[Install]
+WantedBy=multi-user.target

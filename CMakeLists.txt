@@ -12,13 +12,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
 SET(LIBS_STATIC OFF     CACHE BOOL "Should the static version of hipoly library be built?")
 SET(LIBS_SHARED ON      CACHE BOOL "Should the dynamic version of hipoly library be built?")
 SET(TRY_QT_LIB  ON      CACHE BOOL "Should the QT lib be used?")
+SET(STAT_TARGET "both"  CACHE STRING "targets: server, client, both")
 
 # ==============================================================================
 # project setup ----------------------------------------------------------------
 # ==============================================================================
 
 # define project name ----------------------------
-SET(WOLF_VERSION 2.0.x)
+SET(WOLF_VERSION 3.0.x)
 
 # what languages we use --------------------------
 ENABLE_LANGUAGE(CXX)
