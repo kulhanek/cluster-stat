@@ -78,7 +78,7 @@ void CStatDatagram::SetDatagram(void)
             char line[UT_LINESIZE+1];
             memset(line,0,UT_LINESIZE+1);
             strncpy(line,my_utmp->ut_line,UT_LINESIZE);
-            if( strstr(line,":") != NULL ){
+            if( (strstr(line,":") != NULL) || (strstr(line,"tty") != NULL) ){
                 char login[UT_NAMESIZE+1];
                 memset(login,0,UT_NAMESIZE+1);
                 strncpy(login,my_utmp->ut_user,UT_NAMESIZE);

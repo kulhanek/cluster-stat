@@ -1,3 +1,5 @@
+share/wolf-stat-client.cron
+share/wolf-stat-server.service
 src/bin/wolf-stat-client/ClientOptions.cpp
 src/bin/wolf-stat-client/ClientOptions.hpp
 src/bin/wolf-stat-client/StatClient.cpp

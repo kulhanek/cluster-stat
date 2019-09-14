@@ -3,3 +3,4 @@ src/bin/wolf-stat-server
 etc
 src/bin
 src/bin/wolf-stat-client
+share

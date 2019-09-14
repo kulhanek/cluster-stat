@@ -3,5 +3,5 @@
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-* *    * * *   wolfstat  /opt/wolf-stat-client/3.0/get-logged-user SERVERNAME >/dev/null 2>&1
+* *    * * *   wolfstat  /opt/wolf-stat-client/3.0/bin/wolf-stat-client SERVERNAME >/dev/null 2>&1
 
