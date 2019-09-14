@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <servers />
-    <watcher logname="/opt/wolf-stat-server/2.0/log/wolf-stat-server.log" />
+    <watcher logname="/tmp/wolf-stat-server.log" />
 </config>
