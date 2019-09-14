@@ -169,6 +169,7 @@ void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
     if( MaxNodes == Nodes.size() ){
         if( Nodes.count(node) == 1 ){
             NodesMutex.Unlock();
+            ES_ERROR("too many nodes - skiping new registration");
             return;
         }
     }
