@@ -32,6 +32,7 @@
 #include <errno.h>
 #include <StatServer.hpp>
 #include <StatDatagram.hpp>
+#include <FCGIStatServer.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -162,23 +163,7 @@ void CStatServer::ExecuteThread(void)
             continue;
         }
 
-
-//        // write data to database---------------------
-//        if( Transaction.StartTransaction() == false ) {
-//            ES_ERROR("unable to start database transaction");
-//            continue;
-//        }
-
-//        if( WriteDataToDatabase(datagram) == false ){
-//            ES_ERROR("unable to write datagram to database");
-//            Transaction.RollbackTransaction();
-//            continue;
-//        }
-
-//        if( Transaction.CommitTransaction() == false ) {
-//            ES_ERROR("unable to commit database transaction");
-//            continue;
-//        }
+        WolfStatServer.RegisterNode(datagram);
 
         SuccessfulRequests++;
     }

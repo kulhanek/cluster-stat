@@ -158,6 +158,26 @@ void CFCGIStatServer::Finalize(void)
     vout << endl;
 }
 
+//------------------------------------------------------------------------------
+
+void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
+{
+    NodesMutex.Lock();
+
+    string node = string(dtg.GetNodeName());
+
+    if( MaxNodes == Nodes.size() ){
+        if( Nodes.count(node) == 1 ){
+            NodesMutex.Unlock();
+            return;
+        }
+    }
+
+    Nodes[node] = dtg;
+
+    NodesMutex.Unlock();
+}
+
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================

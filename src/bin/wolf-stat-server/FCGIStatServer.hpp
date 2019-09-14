@@ -53,6 +53,9 @@ public:
     /// finalize
     void Finalize(void);
 
+    /// register node
+    void RegisterNode(CStatDatagram& dtg);
+
 // section of private data -----------------------------------------------------
 private:
     CServerOptions      Options;
@@ -64,7 +67,7 @@ private:
     CSimpleMutex        NodesMutex;
     int                 FCGIPort;
     int                 StatPort;
-    int                 MaxNodes;
+    unsigned int        MaxNodes;
 
     std::map<std::string,CStatDatagram> Nodes;
 

@@ -170,6 +170,14 @@ CSmallString CStatDatagram::GetShortNodeName(void)
 
 //------------------------------------------------------------------------------
 
+CSmallString CStatDatagram::GetNodeName(void)
+{
+    NodeName[NAME_SIZE-1] = '\0';
+    return(NodeName);
+}
+
+//------------------------------------------------------------------------------
+
 CSmallString CStatDatagram::GetUserName(void)
 {
     UserName[NAME_SIZE-1] = '\0';

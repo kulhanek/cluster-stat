@@ -39,6 +39,7 @@ public:
 
 // getters ---------------------------------------------------------------------
     CSmallString GetShortNodeName(void);
+    CSmallString GetNodeName(void);
     CSmallString GetUserName(void);
     CSmallString GetLoginName(void);
     int          GetTimeStamp(void);
