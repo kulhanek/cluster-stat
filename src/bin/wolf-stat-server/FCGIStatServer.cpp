@@ -60,7 +60,7 @@ CFCGIStatServer::CFCGIStatServer(void)
 {
     FCGIPort = 32597;
     StatPort = 32598;
-    MaxNodes = 30;
+    MaxNodes = 100;
 }
 
 //==============================================================================
