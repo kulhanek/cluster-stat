@@ -21,27 +21,27 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "WolfStatOptions.hpp"
+#include <ServerOptions.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CWolfStatOptions::CWolfStatOptions(void)
+CServerOptions::CServerOptions(void)
 {
     SetShowMiniUsage(true);
 }
 
 //------------------------------------------------------------------------------
 
-int CWolfStatOptions::CheckOptions(void)
+int CServerOptions::CheckOptions(void)
 {
     return(SO_CONTINUE);
 }
 
 //------------------------------------------------------------------------------
 
-int CWolfStatOptions::FinalizeOptions(void)
+int CServerOptions::FinalizeOptions(void)
 {
     bool ret_opt = false;
 

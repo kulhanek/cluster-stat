@@ -1,5 +1,5 @@
-#ifndef WolfStatOptionsH
-#define WolfStatOptionsH
+#ifndef ServerOptionsH
+#define ServerOptionsH
 // =============================================================================
 //  WOLF Stat Server
 // -----------------------------------------------------------------------------
@@ -24,13 +24,14 @@
 // =============================================================================
 
 #include <SimpleOptions.hpp>
+#include <StatMainHeader.hpp>
 
 //------------------------------------------------------------------------------
 
-class CWolfStatOptions : public CSimpleOptions {
+class CServerOptions : public CSimpleOptions {
 public:
     // constructor - tune option setup
-    CWolfStatOptions(void);
+    CServerOptions(void);
 
     // program name and description -----------------------------------------------
     CSO_PROG_NAME_BEGIN
@@ -40,6 +41,10 @@ public:
     CSO_PROG_DESC_BEGIN
     "FastCGI server providing web services related to utilization of WOLF cluster."
     CSO_PROG_DESC_END
+
+    CSO_PROG_VERS_BEGIN
+    StatBuildVersion
+    CSO_PROG_VERS_END
 
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN

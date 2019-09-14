@@ -4,10 +4,13 @@
 
 # program objects --------------------------------------------------------------
 SET(PROG_SRC
-        WolfStatOptions.cpp
-        WolfStatServer.cpp
-        ServerWatcher.cpp
         prefix.c
+        StatMainHeader.cpp
+        ServerOptions.cpp
+        FCGIStatServer.cpp
+        StatServer.cpp
+        StatDatagram.cpp
+        ServerWatcher.cpp
         _ListLoggedUsers.cpp
         _Error.cpp
         )

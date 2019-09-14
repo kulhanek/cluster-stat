@@ -1,10 +1,9 @@
+#ifndef AMSStatServerH
+#define AMSStatServerH
 // =============================================================================
-//  WOLF Stat Server
+// AMS - Advanced Module System
 // -----------------------------------------------------------------------------
-//     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
-//     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
-//     Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
-//     Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
+//    Copyright (C) 2004,2005,2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -21,21 +20,32 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "FCGIStatServer.hpp"
-#include <TemplateParams.hpp>
-#include <ErrorSystem.hpp>
+#include <SmartThread.hpp>
 
-//==============================================================================
 //------------------------------------------------------------------------------
-//==============================================================================
 
-bool CFCGIStatServer::_Error(CFCGIRequest& request)
-{
-    request.OutStream.PutStr("ERROR");
-    request.FinishRequest();
-    return(true);
-}
+class CStatServer : public CSmartThread  {
+public:
+// constructor and destructors -------------------------------------------------
+    CStatServer(void);
+    ~CStatServer(void);
 
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
+    ///! set server port
+    void SetPort(int port);
+
+// section of private data -----------------------------------------------------
+private:
+    int Port;
+    int Socket;
+    int AllRequests;
+    int SuccessfulRequests;
+
+// execute server --------------------------------------------------------------
+    //! execute server
+    virtual void ExecuteThread(void);
+
+};
+
+// -----------------------------------------------------------------------------
+
+#endif

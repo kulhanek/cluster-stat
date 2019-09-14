@@ -21,7 +21,7 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "WolfStatServer.hpp"
+#include "FCGIStatServer.hpp"
 #include <TemplateParams.hpp>
 #include <ErrorSystem.hpp>
 #include <FileName.hpp>
@@ -41,69 +41,43 @@ using namespace boost;
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CWolfStatServer::_ListLoggedUsers(CFCGIRequest& request)
+bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
 {
-    CFileName           dir = GetLoggedUserStatDir();
-    CDirectoryEnum      edir;
-    vector<CFileName>   nodes;
+    NodesMutex.Lock();
 
-    edir.SetDirName(dir);
-    edir.StartFindFile(GetLoggedUserStatFilter());
-
-    CFileName node;
-    while( edir.FindFile(node) ){
-        nodes.push_back(node);
-    }
-
-    edir.EndFindFile();
-
-    vector<CFileName>::iterator it = nodes.begin();
-    vector<CFileName>::iterator ie = nodes.end();
+    std::map<std::string,CStatDatagram>::iterator it = Nodes.begin();
+    std::map<std::string,CStatDatagram>::iterator ie = Nodes.end();
 
     while( it != ie ){
-        CSmallString full_name = *it;
-        CSmallString short_name = GetShortName(full_name);
-
-        ifstream ifs(dir / full_name);
-        string          line;
-        vector<string>  words;
-
-        if( ifs ){
-            getline(ifs,line);
-            split(words,line,is_any_of(";"));
-            ifs.close();
-        }
+        CStatDatagram dtg = it->second;
 
         // check node status
         CSmallString status = "up";
         // check timestamp from user stat file
-        if( words.size() > 0 ){
-            CSmallString stimestamp = words[0];
-            CSmallTimeAndDate stime(stimestamp.ToInt());
-            CSmallTimeAndDate ctime;
-            ctime.GetActualTimeAndDate();
-            CSmallTime diff = ctime - stime;
-            if( diff > 300 ){  // skew of 300 seconds
-                status = "down";
-            }
-        } else {
-            status = "down"; // stat file does not exist
+        CSmallTimeAndDate stime(dtg.GetTimeStamp());
+        CSmallTimeAndDate ctime;
+        ctime.GetActualTimeAndDate();
+        CSmallTime diff = ctime - stime;
+        if( diff > 300 ){  // skew of 300 seconds
+            status = "down";
         }
 
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
-        request.OutStream.PutStr(short_name); // node name
-        if( words.size() == 3 ){
+        request.OutStream.PutStr(dtg.GetShortNodeName()); // node name
+        if( dtg.GetLoginName() != NULL ){
             request.OutStream.PutChar(';');
-            request.OutStream.PutStr(words[1].c_str()); // full user name - optional
+            request.OutStream.PutStr(dtg.GetUserName()); // full user name - optional
             request.OutStream.PutChar(';');
-            request.OutStream.PutStr(words[2].c_str()); // login name - optional
+            request.OutStream.PutStr(dtg.GetLoginName()); // login name - optional
         }
         request.OutStream.PutChar('\n');
 
         it++;
     }
+
+    NodesMutex.Unlock();
 
     // finalize request
     request.FinishRequest();

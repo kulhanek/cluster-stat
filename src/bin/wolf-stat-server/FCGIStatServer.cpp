@@ -21,35 +21,34 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "WolfStatServer.hpp"
+#include "FCGIStatServer.hpp"
 #include <FCGIRequest.hpp>
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
 #include <signal.h>
 #include <XMLElement.hpp>
 #include <XMLParser.hpp>
-#include "prefix.h"
 #include <TemplatePreprocessor.hpp>
 #include <TemplateCache.hpp>
 #include <Template.hpp>
 #include <XMLPrinter.hpp>
 #include <XMLText.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
+#include <iostream>
+#include <prefix.h>
+
+//------------------------------------------------------------------------------
 
 using namespace std;
-using namespace boost;
 
 //------------------------------------------------------------------------------
 
-const char* LibBuildVersion_WOLF_Web = "wolf-stat-server 2.0";
+const char* LibBuildVersion_WOLF_Web = "wolf-stat-server 3.0";
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CWolfStatServer WolfStatServer;
+CFCGIStatServer WolfStatServer;
 
 MAIN_ENTRY_OBJECT(WolfStatServer)
 
@@ -57,15 +56,18 @@ MAIN_ENTRY_OBJECT(WolfStatServer)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CWolfStatServer::CWolfStatServer(void)
+CFCGIStatServer::CFCGIStatServer(void)
 {
+    FCGIPort = 32597;
+    StatPort = 32598;
+    MaxNodes = 30;
 }
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-int CWolfStatServer::Init(int argc,char* argv[])
+int CFCGIStatServer::Init(int argc,char* argv[])
 {
     // encode program options, all check procedures are done inside of CABFIntOpts
     int result = Options.ParseCmdLine(argc,argv);
@@ -100,17 +102,19 @@ int CWolfStatServer::Init(int argc,char* argv[])
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CWolfStatServer::Run(void)
+bool CFCGIStatServer::Run(void)
 {
     // CtrlC signal
     signal(SIGINT,CtrlCSignalHandler);
     signal(SIGTERM,CtrlCSignalHandler);
 
-    SetPort(GetPortNumber());
+    SetPort(FCGIPort);
+    StatServer.SetPort(StatPort);
 
     // start servers
-    Watcher.StartThread(); // watcher
-    if( StartServer() == false ) { // and fcgi server
+    Watcher.StartThread();          // watcher
+    //StatServer.StartThread();             // stat server
+    if( StartServer() == false ) {  // fcgi server
         return(false);
     }
 
@@ -128,7 +132,7 @@ bool CWolfStatServer::Run(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CWolfStatServer::Finalize(void)
+void CFCGIStatServer::Finalize(void)
 {
     CSmallTimeAndDate dt;
     dt.GetActualTimeAndDate();
@@ -150,7 +154,7 @@ void CWolfStatServer::Finalize(void)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CWolfStatServer::AcceptRequest(void)
+bool CFCGIStatServer::AcceptRequest(void)
 {
     // this is simple FCGI Application with 'Hello world!'
 
@@ -192,56 +196,7 @@ bool CWolfStatServer::AcceptRequest(void)
 
 //------------------------------------------------------------------------------
 
-bool CWolfStatServer::ProcessTemplate(CFCGIRequest& request,
-                                       const CSmallString& template_name,
-                                       CTemplateParams& template_params)
-{
-    // template --------------------------------------------------------
-    CTemplate* p_tmp = TemplateCache.OpenTemplate(template_name);
-
-    if( p_tmp == NULL ) {
-        ES_ERROR("unable to open template");
-        return(false);
-    }
-
-    // preprocess template ---------------------------------------------
-    CTemplatePreprocessor preprocessor;
-    CXMLDocument          output_xml;
-
-    preprocessor.SetInputTemplate(p_tmp);
-    preprocessor.SetOutputDocument(&output_xml);
-
-    if( preprocessor.PreprocessTemplate(&template_params) == false ) {
-        ES_ERROR("unable to preprocess template");
-        return(false);
-    }
-
-    // print output ----------------------------------------------------
-    CXMLPrinter xml_printer;
-
-    xml_printer.SetPrintedXMLNode(&output_xml);
-    xml_printer.SetPrintAsItIs(true);
-
-    unsigned char* p_data;
-    unsigned int   len = 0;
-
-    if( (p_data = xml_printer.Print(len)) == NULL ) {
-        ES_ERROR("unable to print output");
-        return(false);
-    }
-
-    request.OutStream.PutStr((const char*)p_data,len);
-
-    delete[] p_data;
-
-    request.FinishRequest();
-
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
-bool CWolfStatServer::ProcessCommonParams(CFCGIRequest& request,
+bool CFCGIStatServer::ProcessCommonParams(CFCGIRequest& request,
         CTemplateParams& template_params)
 {
     CSmallString server_script_uri;
@@ -269,7 +224,7 @@ bool CWolfStatServer::ProcessCommonParams(CFCGIRequest& request,
 //------------------------------------------------------------------------------
 //==============================================================================
 
-void CWolfStatServer::CtrlCSignalHandler(int signal)
+void CFCGIStatServer::CtrlCSignalHandler(int signal)
 {
     WolfStatServer.vout << endl << endl;
     WolfStatServer.vout << "SIGINT or SIGTERM signal recieved. Initiating server shutdown!" << endl;
@@ -282,7 +237,7 @@ void CWolfStatServer::CtrlCSignalHandler(int signal)
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CWolfStatServer::LoadConfig(void)
+bool CFCGIStatServer::LoadConfig(void)
 {
     CFileName    config_path;
 
@@ -299,117 +254,26 @@ bool CWolfStatServer::LoadConfig(void)
         return(false);
     }
 
-    // temaplate_dir
-    CFileName temp_dir;
-    temp_dir = CFileName(PREFIX) / "var" / "html" / "wolf-stat-server" / "templates";
-
-    TemplateCache.SetTemplatePath(temp_dir);
+    CXMLElement* p_ele = ServerConfig.GetChildElementByPath("config/servers");
+    if( p_ele != NULL ) {
+        // optional setup
+        p_ele->GetAttribute("fcgiport",FCGIPort);
+        p_ele->GetAttribute("statport",StatPort);
+        p_ele->GetAttribute("maxnodes",MaxNodes);
+    }
 
     vout << "#" << endl;
-    vout << "# === [server] =================================================================" << endl;
-    vout << "# FCGI Port (port) = " << GetPortNumber() << endl;
-    vout << "#" << endl;
-
-    vout << "# === [userstat] ===============================================================" << endl;
-    vout << "# Logged user stat dir (userstat/dir)       = " << GetLoggedUserStatDir() << endl;
-    vout << "# Logged user stat filter (userstat/filter) = " << GetLoggedUserStatFilter() << endl;
+    vout << "# === [servers] ================================================================" << endl;
+    vout << "# FCGI Port (fcgiport) = " << FCGIPort << endl;
+    vout << "# Stat Port (statport) = " << StatPort << endl;
+    vout << "# Max nodes (maxnodes) = " << MaxNodes << endl;
     vout << "#" << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
     Watcher.ProcessWatcherControl(vout,p_watcher);
     vout << "#" << endl;
 
-    vout << "# === [internal] ===============================================================" << endl;
-    vout << "# Templates = " << temp_dir << endl;
-    vout << "" << endl;
-
     return(true);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-int CWolfStatServer::GetPortNumber(void)
-{
-    int setup = 32597;
-    CXMLElement* p_ele = ServerConfig.GetChildElementByPath("config/server");
-    if( p_ele == NULL ) {
-        ES_ERROR("unable to open config path");
-        return(setup);
-    }
-    if( p_ele->GetAttribute("port",setup) == false ) {
-        ES_ERROR("unable to get setup item");
-        return(setup);
-    }
-    return(setup);
-}
-
-//==============================================================================
-//------------------------------------------------------------------------------
-//==============================================================================
-
-const CSmallString CWolfStatServer::GetLoggedUserStatDir(void)
-{
-    CSmallString setup;
-    CXMLElement* p_ele = ServerConfig.GetChildElementByPath("config/userstat");
-    if( p_ele == NULL ) {
-        ES_ERROR("unable to open config/userstat path");
-        return(setup);
-    }
-    if( p_ele->GetAttribute("dir",setup) == false ) {
-        ES_ERROR("unable to get dir item");
-        return(setup);
-    }
-    return(setup);
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CWolfStatServer::GetLoggedUserStatFilter(void)
-{
-    CSmallString setup;
-    CXMLElement* p_ele = ServerConfig.GetChildElementByPath("config/userstat");
-    if( p_ele == NULL ) {
-        ES_ERROR("unable to open config/userstat path");
-        return(setup);
-    }
-    if( p_ele->GetAttribute("filter",setup) == false ) {
-        ES_ERROR("unable to get filter item");
-        return(setup);
-    }
-    return(setup);
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CWolfStatServer::Transform(const CSmallString& text)
-{
-    // substitute # by %23
-    string stext = string(text);
-    boost::algorithm::replace_all(stext,"#","%23");
-    return(stext);
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CWolfStatServer::GetShortName(const CSmallString& fqdn)
-{
-    string stext = string(fqdn);
-    vector<string>  words;
-    split(words,stext,is_any_of("."));
-    if( words.size() >= 1 ) return( words[0] );
-    return("");
-}
-
-//------------------------------------------------------------------------------
-
-const CSmallString CWolfStatServer::GetTemplateName(const CSmallString& base_name)
-{
-    CSmallString lang = "CS";
-    CSmallString full_name;
-    full_name << base_name << lang << ".html";
-    return(full_name);
 }
 
 //==============================================================================

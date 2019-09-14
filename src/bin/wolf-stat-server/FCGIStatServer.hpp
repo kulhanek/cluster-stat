@@ -1,5 +1,5 @@
-#ifndef WolfStatServerH
-#define WolfStatServerH
+#ifndef FCGIStatServerH
+#define FCGIStatServerH
 // =============================================================================
 //  WOLF Stat Server
 // -----------------------------------------------------------------------------
@@ -26,17 +26,22 @@
 #include <FCGIServer.hpp>
 #include <XMLDocument.hpp>
 #include <FileName.hpp>
-#include <TemplateParams.hpp>
-#include "WolfStatOptions.hpp"
+#include <ServerOptions.hpp>
+#include <StatDatagram.hpp>
 #include <VerboseStr.hpp>
 #include <TerminalStr.hpp>
-#include "ServerWatcher.hpp"
+#include <ServerWatcher.hpp>
+#include <SimpleMutex.hpp>
+#include <TemplateParams.hpp>
+#include <StatServer.hpp>
+#include <map>
+#include <string>
 
 //------------------------------------------------------------------------------
 
-class CWolfStatServer : public CFCGIServer {
+class CFCGIStatServer : public CFCGIServer {
 public:
-    CWolfStatServer(void);
+    CFCGIStatServer(void);
 
 // main methods ----------------------------------------------------------------
     /// init options
@@ -50,14 +55,20 @@ public:
 
 // section of private data -----------------------------------------------------
 private:
-    CWolfStatOptions    Options;
+    CServerOptions      Options;
     CXMLDocument        ServerConfig;
     CTerminalStr        Console;
     CVerboseStr         vout;
     CServerWatcher      Watcher;
+    CStatServer         StatServer;
+    CSimpleMutex        NodesMutex;
+    int                 FCGIPort;
+    int                 StatPort;
+    int                 MaxNodes;
+
+    std::map<std::string,CStatDatagram> Nodes;
 
     static  void CtrlCSignalHandler(int signal);
-
     virtual bool AcceptRequest(void);
 
     // web pages handlers ------------------------------------------------------
@@ -67,33 +78,13 @@ private:
     bool ProcessCommonParams(CFCGIRequest& request,
                              CTemplateParams& template_params);
 
-    bool ProcessTemplate(CFCGIRequest& request,
-                         const CSmallString& template_name,
-                         CTemplateParams& template_params);
-
     // configuration options ---------------------------------------------------
     bool LoadConfig(void);
-
-    // fcgi server
-    int                GetPortNumber(void);
-
-    // statistics
-    const CSmallString GetLoggedUserStatDir(void);
-    const CSmallString GetLoggedUserStatFilter(void);
-
-    // transform string with #
-    const CSmallString Transform(const CSmallString& text);
-
-    // get short name from FQDN
-    const CSmallString GetShortName(const CSmallString& fqdn);
-
-    // get template name
-    const CSmallString GetTemplateName(const CSmallString& base_name);
 };
 
 //------------------------------------------------------------------------------
 
-extern CWolfStatServer WolfStatServer;
+extern CFCGIStatServer WolfStatServer;
 
 //------------------------------------------------------------------------------
 
