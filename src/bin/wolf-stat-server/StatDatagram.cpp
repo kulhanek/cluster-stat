@@ -120,6 +120,8 @@ void CStatDatagram::SetDatagram(void)
         }
     }
 
+    if( p_sf ) fclose(p_sf);
+
     // load active tty
     FILE* p_tty0 = fopen("/sys/class/tty/tty0/active","r");
     if( p_tty0 ){
