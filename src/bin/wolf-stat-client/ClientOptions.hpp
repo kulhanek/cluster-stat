@@ -49,6 +49,7 @@ public:
     CSO_ARG(CSmallString,ServerName)
     // options ------------------------------
     CSO_OPT(int,Port)
+    CSO_OPT(int,Interval)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -71,6 +72,15 @@ public:
                 "port",                      /* long option name */
                 "PORT",                           /* parametr name */
                 "port number for communication")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(int,                            /* option type */
+                Interval,                           /* option name */
+                15,                          /* default value */
+                false,                          /* is option mandatory */
+                'i',                           /* short option name */
+                "interval",                      /* long option name */
+                "TIME",                           /* parametr name */
+                "delay between regular node status updates (zero value means one shot update)")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */

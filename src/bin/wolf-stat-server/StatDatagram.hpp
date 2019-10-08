@@ -27,6 +27,7 @@
 
 #define HEADER_SIZE 4
 #define NAME_SIZE   64
+#define MAX_TTYS    12
 
 // -----------------------------------------------------------------------------
 
@@ -50,11 +51,12 @@ public:
 private:
     char    Header[HEADER_SIZE];
     char    NodeName[NAME_SIZE];
-    char    UserName[NAME_SIZE];
-    char    LoginName[NAME_SIZE];
-    int     IUsers;                 // number of interactive user sessions
-    int     RUsers;                 // number of all sessions
-    int     TimeStamp;              // time of "meassurement"
+    char    UserName[MAX_TTYS][NAME_SIZE];
+    char    LoginName[MAX_TTYS][NAME_SIZE];
+    int     ActiveTTY;                      // active tty
+    int     NumOfIUsers;                    // number of interactive user sessions
+    int     NumOfAUsers;                    // number of all sessions
+    int     TimeStamp;                      // time of "meassurement"
     int     CheckSum;
 };
 

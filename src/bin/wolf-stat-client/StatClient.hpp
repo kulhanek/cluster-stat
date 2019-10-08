@@ -53,8 +53,11 @@ public:
 private:
     CStatClientOptions  Options;
     CStatDatagram       Datagram;
-    CTerminalStr            Console;
-    CVerboseStr             vout;
+    CTerminalStr        Console;
+    CVerboseStr         vout;
+    bool                Terminated;
+
+    static void CtrlCSignalHandler(int signal);
 };
 
 // -----------------------------------------------------------------------------

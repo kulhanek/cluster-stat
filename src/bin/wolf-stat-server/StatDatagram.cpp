@@ -23,13 +23,13 @@
 #include <SmallTimeAndDate.hpp>
 #include <string>
 #include <vector>
-#include <utmp.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <sstream>
 
 //------------------------------------------------------------------------------
 
@@ -44,10 +44,11 @@ CStatDatagram::CStatDatagram(void)
 {
     memset(Header,0,HEADER_SIZE);
     memset(NodeName,0,NAME_SIZE);
-    memset(UserName,0,NAME_SIZE);
-    memset(LoginName,0,NAME_SIZE);
-    IUsers = 0;
-    RUsers = 0;
+    memset(UserName,0,NAME_SIZE*MAX_TTYS);
+    memset(LoginName,0,NAME_SIZE*MAX_TTYS);
+    ActiveTTY = 0;
+    NumOfIUsers = 0;
+    NumOfAUsers = 0;
     TimeStamp = 0;
     CheckSum = 0;
 }
@@ -58,10 +59,11 @@ void CStatDatagram::SetDatagram(void)
 {
     memset(Header,0,HEADER_SIZE);
     memset(NodeName,0,NAME_SIZE);
-    memset(UserName,0,NAME_SIZE);
-    memset(LoginName,0,NAME_SIZE);
-    IUsers = 0;
-    RUsers = 0;
+    memset(UserName,0,NAME_SIZE*MAX_TTYS);
+    memset(LoginName,0,NAME_SIZE*MAX_TTYS);
+    ActiveTTY = 0;
+    NumOfIUsers = 0;
+    NumOfAUsers = 0;
     TimeStamp = 0;
     CheckSum = 0;
 
@@ -69,39 +71,73 @@ void CStatDatagram::SetDatagram(void)
 
     gethostname(NodeName,NAME_SIZE-1);
 
-    setutent();
+    // get list of local session
+    FILE* p_sf = popen("/bin/loginctl --no-legend --no-pager list-sessions","r");
 
-    struct utmp* my_utmp;
-
-    while( (my_utmp = getutent()) != NULL) {
-        if( my_utmp->ut_type == USER_PROCESS ){
-            char line[UT_LINESIZE+1];
-            memset(line,0,UT_LINESIZE+1);
-            strncpy(line,my_utmp->ut_line,UT_LINESIZE);
-            if( (strstr(line,":") != NULL) || (strstr(line,"tty") != NULL) ){
-                char login[UT_NAMESIZE+1];
-                memset(login,0,UT_NAMESIZE+1);
-                strncpy(login,my_utmp->ut_user,UT_NAMESIZE);
-                struct passwd* my_passwd = getpwnam(login);
-                if( my_passwd != NULL ){
-                    CSmallString name;
-                    std::string stext = std::string(my_passwd->pw_gecos);
-                    vector<string>  words;
-                    split(words,stext,is_any_of(","));
-                    if( words.size() >= 1 ){
-                        name = words[0];
-                    }
-                    strncpy(UserName,name,NAME_SIZE-1);
+    CSmallString buffer;
+    while( (p_sf != NULL) && (buffer.ReadLineFromFile(p_sf,true,true)) ) {
+        NumOfAUsers++;
+        stringstream str(buffer.GetBuffer());
+        string sid;
+        string uid;
+        string user;
+        string seat;
+        string tty;
+        str >> sid >> uid >> user >> seat >> tty;
+        if( seat == "seat0" ){
+            // decode user
+            char login[NAME_SIZE+1];
+            memset(login,0,NAME_SIZE+1);
+            strncpy(login,user.c_str(),NAME_SIZE);
+            struct passwd* my_passwd = getpwnam(login);
+            // only regular users
+            if( (my_passwd != NULL) && (my_passwd->pw_uid > 1000) ){
+                CSmallString name;
+                std::string stext = std::string(my_passwd->pw_gecos);
+                vector<string>  words;
+                split(words,stext,is_any_of(","));
+                if( words.size() >= 1 ){
+                    name = words[0];
                 }
-                strncpy(LoginName,login,NAME_SIZE-1);
-                IUsers++;
-            } else {
-                RUsers++;
+                // decode tty
+                char line[NAME_SIZE+1];
+                memset(line,0,NAME_SIZE+1);
+                strncpy(line,tty.c_str(),NAME_SIZE);
+                line[0] = ' ';
+                line[1] = ' ';
+                line[2] = ' ';
+                stringstream str(line);
+                int tty = 0;
+                str >> tty;
+                if( (tty > 0) && (tty <= MAX_TTYS) ){
+                    tty--;
+                    NumOfIUsers++;
+                    strncpy(UserName[tty],name,NAME_SIZE-1);
+                    strncpy(LoginName[tty],login,NAME_SIZE-1);
+                }
             }
+
         }
     }
 
-    endutent();
+    // load active tty
+    FILE* p_tty0 = fopen("/sys/class/tty/tty0/active","r");
+    if( p_tty0 ){
+        char ttyname[NAME_SIZE+1];
+        memset(ttyname,0,NAME_SIZE+1);
+        fgets(ttyname,NAME_SIZE,p_tty0);
+        if( strstr(ttyname,"tty") != NULL ){
+            ttyname[0] = ' ';
+            ttyname[1] = ' ';
+            ttyname[2] = ' ';
+            stringstream str(ttyname);
+            str >> ActiveTTY;
+            if( (ActiveTTY <= 0) || (ActiveTTY > MAX_TTYS) ){
+                ActiveTTY = 0;
+            }
+        }
+        fclose(p_tty0);
+    }
 
     CSmallTimeAndDate time;
     time.GetActualTimeAndDate();
@@ -113,11 +149,17 @@ void CStatDatagram::SetDatagram(void)
     }
     for(size_t i=0; i < NAME_SIZE; i++){
         CheckSum += (unsigned char)NodeName[i];
-        CheckSum += (unsigned char)UserName[i];
-        CheckSum += (unsigned char)LoginName[i];
     }
-    CheckSum += IUsers;
-    CheckSum += RUsers;
+    for(size_t k=0; k < MAX_TTYS; k++){
+        for(size_t i=0; i < NAME_SIZE; i++){
+            CheckSum += (unsigned char)UserName[k][i];
+            CheckSum += (unsigned char)LoginName[k][i];
+        }
+    }
+
+    CheckSum += ActiveTTY;
+    CheckSum += NumOfIUsers;
+    CheckSum += NumOfAUsers;
     CheckSum += TimeStamp;
 }
 
@@ -133,11 +175,17 @@ bool CStatDatagram::IsValid(void)
     }
     for(size_t i=0; i < NAME_SIZE; i++){
         checksum += (unsigned char)NodeName[i];
-        checksum += (unsigned char)UserName[i];
-        checksum += (unsigned char)LoginName[i];
     }
-    checksum += IUsers;
-    checksum += RUsers;
+    for(size_t k=0; k < MAX_TTYS; k++){
+        for(size_t i=0; i < NAME_SIZE; i++){
+            checksum += (unsigned char)UserName[k][i];
+            checksum += (unsigned char)LoginName[k][i];
+        }
+    }
+
+    checksum += ActiveTTY;
+    checksum += NumOfIUsers;
+    checksum += NumOfAUsers;
     checksum += TimeStamp;
 
     return( checksum == CheckSum );
@@ -150,8 +198,9 @@ void CStatDatagram::PrintInfo(std::ostream& vout)
     vout << "Node  = " << GetShortNodeName() << endl;
     vout << "User  = " << GetUserName() << endl;
     vout << "Login = " << GetLoginName() << endl;
-    vout << "I#    = " << IUsers << endl;
-    vout << "R#    = " << RUsers << endl;
+    vout << "ATTY  = " << ActiveTTY << endl;
+    vout << "I#U   = " << NumOfIUsers << endl;
+    vout << "T#U   = " << NumOfAUsers << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -180,16 +229,24 @@ CSmallString CStatDatagram::GetNodeName(void)
 
 CSmallString CStatDatagram::GetUserName(void)
 {
-    UserName[NAME_SIZE-1] = '\0';
-    return(UserName);
+    if( (ActiveTTY > 0) && (ActiveTTY <= MAX_TTYS) ){
+        size_t id = ActiveTTY-1;
+        UserName[id][NAME_SIZE-1] = '\0';
+        return(UserName[id]);
+    }
+    return("");
 }
 
 //------------------------------------------------------------------------------
 
 CSmallString CStatDatagram::GetLoginName(void)
 {
-    LoginName[NAME_SIZE-1] = '\0';
-    return(LoginName);
+    if( (ActiveTTY > 0) && (ActiveTTY <= MAX_TTYS) ){
+        size_t id = ActiveTTY-1;
+        LoginName[id][NAME_SIZE-1] = '\0';
+        return(LoginName[id]);
+    }
+    return("");
 }
 
 //------------------------------------------------------------------------------

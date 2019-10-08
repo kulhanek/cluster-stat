@@ -33,6 +33,7 @@
 #include <errno.h>
 #include <fnmatch.h>
 #include <StatClient.hpp>
+#include <signal.h>
 
 //------------------------------------------------------------------------------
 
@@ -40,7 +41,11 @@
 
 //------------------------------------------------------------------------------
 
-MAIN_ENTRY(CStatClient)
+CStatClient StatClient;
+
+MAIN_ENTRY_OBJECT(StatClient)
+
+using namespace std;
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -48,6 +53,7 @@ MAIN_ENTRY(CStatClient)
 
 CStatClient::CStatClient(void)
 {
+    Terminated = false;
 }
 
 //==============================================================================
@@ -77,14 +83,24 @@ int CStatClient::Init(int argc, char* argv[])
 
 bool CStatClient::Run(void)
 {
-    Datagram.SetDatagram();
-    vout << high;
-    Datagram.PrintInfo(vout);
+    // CtrlC signal
+    signal(SIGINT,CtrlCSignalHandler);
+    signal(SIGTERM,CtrlCSignalHandler);
 
-    if( SendDataToServer(Options.GetArgServerName(),Options.GetOptPort()) == false ) {
-        ES_ERROR("unable to send datagram");
-        return(false);
-    }
+    do {
+        Datagram.SetDatagram();
+        vout << high;
+        Datagram.PrintInfo(vout);
+
+        if( SendDataToServer(Options.GetArgServerName(),Options.GetOptPort()) == false ) {
+            ES_ERROR("unable to send datagram");
+            return(false);
+        }
+        if( Options.GetOptInterval() > 0 ){
+            sleep(Options.GetOptInterval());
+        }
+
+    } while( (Terminated == false) && (Options.GetOptInterval() != 0) );
 
     return(true);
 }
@@ -97,6 +113,18 @@ void CStatClient::Finalize(void)
         ErrorSystem.PrintErrors(stderr);
         fprintf(stderr,"\n");
     }
+}
+
+//==============================================================================
+//------------------------------------------------------------------------------
+//==============================================================================
+
+void CStatClient::CtrlCSignalHandler(int signal)
+{
+    StatClient.vout << endl << endl;
+    StatClient.vout << "SIGINT or SIGTERM signal recieved. Initiating server shutdown!" << endl;
+    StatClient.vout << "Waiting for server finalization ... " << endl;
+    StatClient.Terminated = true;
 }
 
 //------------------------------------------------------------------------------
