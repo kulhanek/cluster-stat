@@ -43,6 +43,10 @@ public:
     CSmallString GetNodeName(void);
     CSmallString GetLocalUserName(void);
     CSmallString GetLocalLoginName(void);
+    CSmallString GetLocalUserName(int id);
+    CSmallString GetLocalLoginName(int id);
+    CSmallString GetXUserName(int id);
+    CSmallString GetXLoginName(int id);
     int          GetTimeStamp(void);
     void         PrintInfo(std::ostream& vout);
     bool         IsValid(void);

@@ -12,6 +12,7 @@ SET(PROG_SRC
         StatDatagram.cpp
         ServerWatcher.cpp
         _ListLoggedUsers.cpp
+        _ListXSeats.cpp
         _Debug.cpp
         _Error.cpp
         )

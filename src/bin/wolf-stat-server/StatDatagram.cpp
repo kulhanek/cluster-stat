@@ -300,10 +300,6 @@ CSmallString CStatDatagram::GetLocalUserName(void)
         size_t id = ActiveTTY-1;
         LocalUserName[id][NAME_SIZE-1] = '\0';
         return(LocalUserName[id]);
-    } else {
-        if( NumOfXUsers > 0 ){
-            return("X+VNC seats");
-        }
     }
     return("");
 }
@@ -316,10 +312,50 @@ CSmallString CStatDatagram::GetLocalLoginName(void)
         size_t id = ActiveTTY-1;
         LocalLoginName[id][NAME_SIZE-1] = '\0';
         return(LocalLoginName[id]);
-    } else {
-        if( NumOfXUsers > 0 ){
-            return(CSmallString(NumOfXUsers));
-        }
+    }
+    return("");
+}
+
+//------------------------------------------------------------------------------
+
+CSmallString CStatDatagram::GetLocalUserName(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        LocalUserName[id][NAME_SIZE-1] = '\0';
+        return(LocalUserName[id]);
+    }
+    return("");
+}
+
+//------------------------------------------------------------------------------
+
+CSmallString CStatDatagram::GetLocalLoginName(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        LocalLoginName[id][NAME_SIZE-1] = '\0';
+        return(LocalLoginName[id]);
+    }
+    return("");
+}
+
+//------------------------------------------------------------------------------
+
+CSmallString CStatDatagram::GetXUserName(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        XUserName[id][NAME_SIZE-1] = '\0';
+        return(XUserName[id]);
+    }
+    return("");
+}
+
+//------------------------------------------------------------------------------
+
+CSmallString CStatDatagram::GetXLoginName(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        XLoginName[id][NAME_SIZE-1] = '\0';
+        return(XLoginName[id]);
     }
     return("");
 }

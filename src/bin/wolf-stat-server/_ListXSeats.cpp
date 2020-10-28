@@ -38,7 +38,7 @@ using namespace boost;
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
+bool CFCGIStatServer::_ListXSeats(CFCGIRequest& request)
 {
     NodesMutex.Lock();
 

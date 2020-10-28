@@ -68,13 +68,13 @@ bool CFCGIStatServer::_Debug(CFCGIRequest& request)
         str << "<p>Number of tty sessions: " << dtg.NumOfIUsers << "</p>" << endl;
         str << "<ol>" << endl;
         for(int i=0; i < MAX_TTYS; i++){
-            str << "<li>" << dtg.LocalLoginName[i] << " (" << dtg.LocalUserName[i] << ")</li>" << endl;
+            str << "<li>" << dtg.GetLocalLoginName(i) << " (" << dtg.GetLocalUserName(i) << ")</li>" << endl;
         }
         str << "</ol>" << endl;
         str << "<p>Number of X-seats: " << dtg.NumOfXUsers << "</p>" << endl;
         str << "<ol>" << endl;
         for(int i=0; i < MAX_TTYS; i++){
-            str << "<li>" << dtg.XLoginName[i] << " (" << dtg.XUserName[i] << ")</li>" << endl;
+            str << "<li>" << dtg.GetXLoginName(i) << " (" << dtg.GetXUserName(i) << ")</li>" << endl;
         }
         str << "</ol>" << endl;
         it++;
