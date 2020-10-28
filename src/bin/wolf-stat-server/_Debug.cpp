@@ -40,6 +40,10 @@ using namespace boost;
 
 bool CFCGIStatServer::_Debug(CFCGIRequest& request)
 {
+    // write response
+    stringstream str;
+    str << "<html><body>" << endl;
+
     NodesMutex.Lock();
 
     std::map<std::string,CStatDatagram>::iterator it = Nodes.begin();
@@ -57,10 +61,7 @@ bool CFCGIStatServer::_Debug(CFCGIRequest& request)
         CSmallTime diff = ctime - stime;
         if( diff > 300 ){  // skew of 300 seconds
             status = "down";
-        }
-
-        // write response
-        stringstream str;
+        }      
         str << "<h1>" << dtg.GetShortNodeName() << "</h1>" << endl;
         str << "<p>Status: " << status << "</p>" << endl;
         str << "<p>Number of all sessions: " << dtg.NumOfAUsers << "</p>" << endl;
@@ -76,11 +77,15 @@ bool CFCGIStatServer::_Debug(CFCGIRequest& request)
             str << "<li>" << dtg.XLoginName[i] << " (" << dtg.XUserName[i] << ")</li>" << endl;
         }
         str << "</ol>" << endl;
-
         it++;
     }
 
     NodesMutex.Unlock();
+
+    str << "</body></html>" << endl;
+
+    request.OutStream.PutStr(str.str());
+
 
     // finalize request
     request.FinishRequest();
