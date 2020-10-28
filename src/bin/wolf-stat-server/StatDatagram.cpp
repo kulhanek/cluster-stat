@@ -300,6 +300,10 @@ CSmallString CStatDatagram::GetLocalUserName(void)
         size_t id = ActiveTTY-1;
         LocalUserName[id][NAME_SIZE-1] = '\0';
         return(LocalUserName[id]);
+    } else {
+        if( NumOfXUsers > 0 ){
+            return("X+VNC seats");
+        }
     }
     return("");
 }
@@ -312,6 +316,10 @@ CSmallString CStatDatagram::GetLocalLoginName(void)
         size_t id = ActiveTTY-1;
         LocalLoginName[id][NAME_SIZE-1] = '\0';
         return(LocalLoginName[id]);
+    } else {
+        if( NumOfXUsers > 0 ){
+            return(CSmallString(NumOfXUsers));
+        }
     }
     return("");
 }
