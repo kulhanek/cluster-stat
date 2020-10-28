@@ -77,6 +77,7 @@ private:
     // web pages handlers ------------------------------------------------------
     bool _Error(CFCGIRequest& request);
     bool _ListLoggedUsers(CFCGIRequest& request);
+    bool _Debug(CFCGIRequest& request);
 
     bool ProcessCommonParams(CFCGIRequest& request,
                              CTemplateParams& template_params);

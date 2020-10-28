@@ -212,6 +212,9 @@ bool CFCGIStatServer::AcceptRequest(void)
     if( (action == NULL) || (action == "loggedusers") ) {
         result = _ListLoggedUsers(request);
     }
+    if( action == "debug" ) {
+        result = _Debug(request);
+    }
 
     // error handle -----------------------
     if( result == false ) {

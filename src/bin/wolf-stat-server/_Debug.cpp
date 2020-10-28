@@ -1,10 +1,7 @@
 // =============================================================================
 //  WOLF Stat Server
 // -----------------------------------------------------------------------------
-//     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
-//     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
-//     Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
-//     Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2020 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -41,7 +38,7 @@ using namespace boost;
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
+bool CFCGIStatServer::_Debug(CFCGIRequest& request)
 {
     NodesMutex.Lock();
 
@@ -63,16 +60,22 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
         }
 
         // write response
-        request.OutStream.PutStr(status); // node status
-        request.OutStream.PutChar(';');
-        request.OutStream.PutStr(dtg.GetShortNodeName()); // node name
-        if( dtg.GetLocalLoginName() != NULL ){
-            request.OutStream.PutChar(';');
-            request.OutStream.PutStr(dtg.GetLocalUserName()); // full user name - optional
-            request.OutStream.PutChar(';');
-            request.OutStream.PutStr(dtg.GetLocalLoginName()); // login name - optional
+        stringstream str;
+        str << "<h1>" << dtg.GetShortNodeName() << "</h1>" << endl;
+        str << "<p>Status: " << status << "</p>" << endl;
+        str << "<p>Number of all sessions: " << dtg.NumOfAUsers << "</p>" << endl;
+        str << "<p>Number of tty sessions: " << dtg.NumOfIUsers << "</p>" << endl;
+        str << "<ol>" << endl;
+        for(int i=0; i < MAX_TTYS; i++){
+            str << "<li>" << dtg.LocalLoginName[i] << " (" << dtg.LocalUserName[i] << ")</li>" << endl;
         }
-        request.OutStream.PutChar('\n');
+        str << "</ol>" << endl;
+        str << "<p>Number of X-seats: " << dtg.NumOfXUsers << "</p>" << endl;
+        str << "<ol>" << endl;
+        for(int i=0; i < MAX_TTYS; i++){
+            str << "<li>" << dtg.XLoginName[i] << " (" << dtg.XUserName[i] << ")</li>" << endl;
+        }
+        str << "</ol>" << endl;
 
         it++;
     }

@@ -41,8 +41,8 @@ public:
 // getters ---------------------------------------------------------------------
     CSmallString GetShortNodeName(void);
     CSmallString GetNodeName(void);
-    CSmallString GetUserName(void);
-    CSmallString GetLoginName(void);
+    CSmallString GetLocalUserName(void);
+    CSmallString GetLocalLoginName(void);
     int          GetTimeStamp(void);
     void         PrintInfo(std::ostream& vout);
     bool         IsValid(void);
@@ -51,13 +51,18 @@ public:
 private:
     char    Header[HEADER_SIZE];
     char    NodeName[NAME_SIZE];
-    char    UserName[MAX_TTYS][NAME_SIZE];
-    char    LoginName[MAX_TTYS][NAME_SIZE];
+    char    LocalUserName[MAX_TTYS][NAME_SIZE];
+    char    LocalLoginName[MAX_TTYS][NAME_SIZE];
     int     ActiveTTY;                      // active tty
     int     NumOfIUsers;                    // number of interactive user sessions
     int     NumOfAUsers;                    // number of all sessions
+    char    XUserName[MAX_TTYS][NAME_SIZE];
+    char    XLoginName[MAX_TTYS][NAME_SIZE];
+    int     NumOfXUsers;                    // number of X user sessions
     int     TimeStamp;                      // time of "meassurement"
     int     CheckSum;
+
+    friend class CFCGIStatServer;
 };
 
 // -----------------------------------------------------------------------------
