@@ -86,7 +86,6 @@ bool CFCGIStatServer::_Debug(CFCGIRequest& request)
 
     request.OutStream.PutStr(str.str());
 
-
     // finalize request
     request.FinishRequest();
 
