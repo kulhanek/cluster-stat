@@ -179,9 +179,10 @@ void CStatDatagram::SetDatagram(void)
                         }
 
                         if( xseat < MAX_TTYS ){
-                            NumOfXUsers++;
                             strncpy(XUserName[xseat],name,NAME_SIZE-1);
                             strncpy(XLoginName[xseat],login,NAME_SIZE-1);
+                            xseat++;
+                            NumOfXUsers++;
                         }
                     }
                 }

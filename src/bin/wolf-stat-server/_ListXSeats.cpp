@@ -68,9 +68,9 @@ bool CFCGIStatServer::_ListXSeats(CFCGIRequest& request)
             request.OutStream.PutChar(';');
             for(int i=0; i < dtg.NumOfXUsers; i++){
                 if( i > 0 ) request.OutStream.PutStr("|");
-                request.OutStream.PutStr(dtg.XUserName[i]);
+                request.OutStream.PutStr(dtg.GetXUserName(i));
                 request.OutStream.PutStr(" (");
-                request.OutStream.PutStr(dtg.XLoginName[i]);
+                request.OutStream.PutStr(dtg.GetXLoginName(i));
                 request.OutStream.PutStr(")");
             }
         }
