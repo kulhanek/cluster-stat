@@ -100,7 +100,7 @@ void CStatDatagram::SetDatagram(void)
         string seat;
         string tty;
         str >> sid >> uid >> user >> seat >> tty;
-        if( seat == "seat0" ){
+        if( ! (sid .empty() || uid.empty() || user.empty()) ){
             // decode user
             char login[NAME_SIZE+1];
             memset(login,0,NAME_SIZE+1);
