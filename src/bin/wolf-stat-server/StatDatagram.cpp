@@ -55,6 +55,7 @@ CStatDatagram::CStatDatagram(void)
     memset(ActiveLocalLoginName,0,NAME_SIZE);
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(RemoteLoginType,0,MAX_TTYS);
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
     NumOfVNCRemoteUsers = 0;
@@ -74,6 +75,7 @@ void CStatDatagram::SetDatagram(void)
     memset(ActiveLocalLoginName,0,NAME_SIZE);
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(RemoteLoginType,0,MAX_TTYS);
 
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
@@ -186,6 +188,11 @@ void CStatDatagram::SetDatagram(void)
             if( NumOfRemoteUsers < MAX_TTYS ){
                 strncpy(RemoteUserName[NumOfRemoteUsers],ses.UserName,NAME_SIZE-1);
                 strncpy(RemoteLoginName[NumOfRemoteUsers],ses.LoginName,NAME_SIZE-1);
+                if( vnc == true ){
+                    RemoteLoginType[NumOfRemoteUsers] = 'V';
+                } else {
+                    RemoteLoginType[NumOfRemoteUsers] = 'R';
+                }
                 NumOfRemoteUsers++;
                 if( vnc == true ) NumOfVNCRemoteUsers++;
             }
@@ -224,6 +231,10 @@ void CStatDatagram::SetDatagram(void)
             CheckSum += (unsigned char)RemoteLoginName[k][i];
         }
     }
+    for(size_t i=0; i < MAX_TTYS; i++){
+        CheckSum += (unsigned char)RemoteLoginType[i];
+    }
+
     CheckSum += NumOfLocalUsers;
     CheckSum += NumOfRemoteUsers;
     CheckSum += NumOfVNCRemoteUsers;
@@ -261,6 +272,10 @@ bool CStatDatagram::IsValid(void)
             checksum += (unsigned char)RemoteUserName[k][i];
             checksum += (unsigned char)RemoteLoginName[k][i];
         }
+    }
+
+    for(size_t i=0; i < MAX_TTYS; i++){
+        checksum += (unsigned char)RemoteLoginType[i];
     }
 
     checksum += NumOfLocalUsers;
@@ -361,6 +376,16 @@ CSmallString CStatDatagram::GetRemoteLoginName(int id)
         return(RemoteLoginName[id]);
     }
     return("");
+}
+
+//------------------------------------------------------------------------------
+
+char CStatDatagram::GetRemoteLoginType(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        return(RemoteLoginType[id]);
+    }
+    return(' ');
 }
 
 //------------------------------------------------------------------------------

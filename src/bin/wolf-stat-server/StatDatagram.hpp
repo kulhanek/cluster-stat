@@ -49,6 +49,7 @@ public:
     CSmallString GetLocalLoginName(int id);
     CSmallString GetRemoteUserName(int id);
     CSmallString GetRemoteLoginName(int id);
+    char         GetRemoteLoginType(int id);
     int          GetTimeStamp(void);
     void         PrintInfo(std::ostream& vout);
     bool         IsValid(void);
@@ -68,6 +69,7 @@ private:
     int     NumOfVNCRemoteUsers; // subgroup of NumOfRemoteUsers
     char    RemoteUserName[MAX_TTYS][NAME_SIZE];
     char    RemoteLoginName[MAX_TTYS][NAME_SIZE];
+    char    RemoteLoginType[MAX_TTYS];
     // service information
     int     TimeStamp;                      // time of "meassurement"
     int     CheckSum;
