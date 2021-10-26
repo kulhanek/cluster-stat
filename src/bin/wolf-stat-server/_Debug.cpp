@@ -64,17 +64,17 @@ bool CFCGIStatServer::_Debug(CFCGIRequest& request)
         }      
         str << "<h1>" << dtg.GetShortNodeName() << "</h1>" << endl;
         str << "<p>Status: " << status << "</p>" << endl;
-        str << "<p>Number of all sessions: " << dtg.NumOfAUsers << "</p>" << endl;
-        str << "<p>Number of tty sessions: " << dtg.NumOfIUsers << "</p>" << endl;
+        str << "<p>Number of local sessions : " << dtg.NumOfLocalUsers << "</p>" << endl;
         str << "<ol>" << endl;
         for(int i=0; i < MAX_TTYS; i++){
             str << "<li>" << dtg.GetLocalLoginName(i) << " (" << dtg.GetLocalUserName(i) << ")</li>" << endl;
         }
         str << "</ol>" << endl;
-        str << "<p>Number of X-seats: " << dtg.NumOfXUsers << "</p>" << endl;
+        str << "<p>Number of remote sessions: " << dtg.NumOfRemoteUsers << "</p>" << endl;
+        str << "<p>Number of VNC sessions   : " << dtg.NumOfVNCRemoteUsers << "</p>" << endl;
         str << "<ol>" << endl;
         for(int i=0; i < MAX_TTYS; i++){
-            str << "<li>" << dtg.GetXLoginName(i) << " (" << dtg.GetXUserName(i) << ")</li>" << endl;
+            str << "<li>" << dtg.GetRemoteLoginName(i) << " (" << dtg.GetRemoteUserName(i) << ")</li>" << endl;
         }
         str << "</ol>" << endl;
         it++;

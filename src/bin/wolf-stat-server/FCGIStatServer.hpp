@@ -77,7 +77,7 @@ private:
     // web pages handlers ------------------------------------------------------
     bool _Error(CFCGIRequest& request);
     bool _ListLoggedUsers(CFCGIRequest& request);
-    bool _ListXSeats(CFCGIRequest& request);
+    bool _ListAllSeats(CFCGIRequest& request);
     bool _Debug(CFCGIRequest& request);
 
     bool ProcessCommonParams(CFCGIRequest& request,

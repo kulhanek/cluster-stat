@@ -72,11 +72,11 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
             request.OutStream.PutChar(';');
             request.OutStream.PutStr(dtg.GetLocalLoginName()); // login name - optional
         } else {
-            if( dtg.NumOfXUsers > 0 ){
+            if( (dtg.NumOfLocalUsers > 0) || (dtg.NumOfVNCRemoteUsers < 0) ){
                 request.OutStream.PutChar(';');
                 request.OutStream.PutStr("X+VNC seats"); // full user name - optional
                 request.OutStream.PutChar(';');
-                request.OutStream.PutStr(CSmallString(dtg.NumOfXUsers)); // login name - optional
+                request.OutStream.PutStr(CSmallString(dtg.NumOfLocalUsers+dtg.NumOfVNCRemoteUsers)); // login name - optional
             }
 
         }

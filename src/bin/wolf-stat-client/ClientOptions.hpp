@@ -36,7 +36,7 @@ public:
     CSO_PROG_NAME_END
 
     CSO_PROG_DESC_BEGIN
-    "The program notifies the server about interactivelly logged users."
+    "The program notifies the server about logged users."
     CSO_PROG_DESC_END
 
     CSO_PROG_VERS_BEGIN

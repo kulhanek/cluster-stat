@@ -3,6 +3,7 @@
 // =============================================================================
 // wolf-stat-client
 // -----------------------------------------------------------------------------
+//    Copyright (C) 2021      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
@@ -28,6 +29,7 @@
 #define HEADER_SIZE 4
 #define NAME_SIZE   64
 #define MAX_TTYS    12
+#define BUFFER_LEN  1024
 
 // -----------------------------------------------------------------------------
 
@@ -45,8 +47,8 @@ public:
     CSmallString GetLocalLoginName(void);
     CSmallString GetLocalUserName(int id);
     CSmallString GetLocalLoginName(int id);
-    CSmallString GetXUserName(int id);
-    CSmallString GetXLoginName(int id);
+    CSmallString GetRemoteUserName(int id);
+    CSmallString GetRemoteLoginName(int id);
     int          GetTimeStamp(void);
     void         PrintInfo(std::ostream& vout);
     bool         IsValid(void);
@@ -55,18 +57,31 @@ public:
 private:
     char    Header[HEADER_SIZE];
     char    NodeName[NAME_SIZE];
+    // local users
+    int     NumOfLocalUsers;
     char    LocalUserName[MAX_TTYS][NAME_SIZE];
     char    LocalLoginName[MAX_TTYS][NAME_SIZE];
-    int     ActiveTTY;                      // active tty
-    int     NumOfIUsers;                    // number of interactive user sessions
-    int     NumOfAUsers;                    // number of all sessions
-    char    XUserName[MAX_TTYS][NAME_SIZE];
-    char    XLoginName[MAX_TTYS][NAME_SIZE];
-    int     NumOfXUsers;                    // number of X user sessions
+    char    ActiveLocalUserName[NAME_SIZE];
+    char    ActiveLocalLoginName[NAME_SIZE];
+    // remote users
+    int     NumOfRemoteUsers;
+    int     NumOfVNCRemoteUsers; // subgroup of NumOfRemoteUsers
+    char    RemoteUserName[MAX_TTYS][NAME_SIZE];
+    char    RemoteLoginName[MAX_TTYS][NAME_SIZE];
+    // service information
     int     TimeStamp;                      // time of "meassurement"
     int     CheckSum;
 
     friend class CFCGIStatServer;
+};
+
+// -----------------------------------------------------------------------------
+
+class CUserSession {
+public:
+    std::string SessionID;
+    char        UserName[NAME_SIZE];
+    char        LoginName[NAME_SIZE];
 };
 
 // -----------------------------------------------------------------------------

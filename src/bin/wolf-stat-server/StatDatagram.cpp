@@ -34,6 +34,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <list>
 
 //------------------------------------------------------------------------------
 
@@ -50,12 +51,13 @@ CStatDatagram::CStatDatagram(void)
     memset(NodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
-    memset(XUserName,0,NAME_SIZE*MAX_TTYS);
-    memset(XLoginName,0,NAME_SIZE*MAX_TTYS);
-    ActiveTTY = 0;
-    NumOfIUsers = 0;
-    NumOfXUsers = 0;
-    NumOfAUsers = 0;
+    memset(ActiveLocalUserName,0,NAME_SIZE);
+    memset(ActiveLocalLoginName,0,NAME_SIZE);
+    memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
+    memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
+    NumOfLocalUsers = 0;
+    NumOfRemoteUsers = 0;
+    NumOfVNCRemoteUsers = 0;
     TimeStamp = 0;
     CheckSum = 0;
 }
@@ -68,13 +70,15 @@ void CStatDatagram::SetDatagram(void)
     memset(NodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
-    memset(XUserName,0,NAME_SIZE*MAX_TTYS);
-    memset(XLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(ActiveLocalUserName,0,NAME_SIZE);
+    memset(ActiveLocalLoginName,0,NAME_SIZE);
+    memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
+    memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
 
-    ActiveTTY = 0;
-    NumOfIUsers = 0;
-    NumOfXUsers = 0;
-    NumOfAUsers = 0;
+    NumOfLocalUsers = 0;
+    NumOfRemoteUsers = 0;
+    NumOfVNCRemoteUsers = 0;
+
     TimeStamp = 0;
     CheckSum = 0;
 
@@ -82,12 +86,13 @@ void CStatDatagram::SetDatagram(void)
 
     gethostname(NodeName,NAME_SIZE-1);
 
-    // get list of local session
+    // get list of local sessions
+    std::list<CUserSession> sessions;
+
     FILE* p_sf = popen("/bin/loginctl --no-legend --no-pager list-sessions","r");
 
     CSmallString buffer;
     while( (p_sf != NULL) && (buffer.ReadLineFromFile(p_sf,true,true)) ) {
-        NumOfAUsers++;
         stringstream str(buffer.GetBuffer());
         string sid;
         string uid;
@@ -110,85 +115,83 @@ void CStatDatagram::SetDatagram(void)
                 if( words.size() >= 1 ){
                     name = words[0];
                 }
-                // decode tty
-                char line[NAME_SIZE+1];
-                memset(line,0,NAME_SIZE+1);
-                strncpy(line,tty.c_str(),NAME_SIZE);
-                line[0] = ' ';
-                line[1] = ' ';
-                line[2] = ' ';
-                stringstream str(line);
-                int tty = 0;
-                str >> tty;
-                if( (tty > 0) && (tty <= MAX_TTYS) ){
-                    tty--;
-                    NumOfIUsers++;
-                    strncpy(LocalUserName[tty],name,NAME_SIZE-1);
-                    strncpy(LocalLoginName[tty],login,NAME_SIZE-1);
-                }
+                CUserSession ses;
+                ses.SessionID = sid;
+                strncpy(ses.UserName,name,NAME_SIZE-1);
+                strncpy(ses.LoginName,login,NAME_SIZE-1);
+                sessions.push_back(ses);
             }
-
         }
     }
-
-    if( p_sf ) fclose(p_sf);
+    if( p_sf ) pclose(p_sf);
 
     // load active tty
+    CSmallString active_tty;
+    active_tty = "TTY=";
     FILE* p_tty0 = fopen("/sys/class/tty/tty0/active","r");
     if( p_tty0 ){
-        char ttyname[NAME_SIZE+1];
-        memset(ttyname,0,NAME_SIZE+1);
-        fgets(ttyname,NAME_SIZE,p_tty0);
-        if( strstr(ttyname,"tty") != NULL ){
-            ttyname[0] = ' ';
-            ttyname[1] = ' ';
-            ttyname[2] = ' ';
-            stringstream str(ttyname);
-            str >> ActiveTTY;
-            if( (ActiveTTY <= 0) || (ActiveTTY > MAX_TTYS) ){
-                ActiveTTY = 0;
-            }
-        }
+        active_tty.ReadLineFromFile(p_tty0,true,false);
         fclose(p_tty0);
     }
 
-    // read X sessions
-    CFileName root_x("/tmp/.X11-unix");
-    DIR* x_dir = opendir(root_x);
-    if( x_dir != NULL ){
-        struct dirent* e_dir;
-        int xseat = 0;
-        while( (e_dir = readdir(x_dir)) != NULL ){
-            if( e_dir->d_type == DT_SOCK ) {
-                CFileName fname = root_x / CFileName(e_dir->d_name);
-                struct stat x_stat;
-                if( stat(fname,&x_stat) == 0 ){
-                    struct passwd* my_passwd = getpwuid(x_stat.st_uid);
-                    char login[NAME_SIZE+1];
-                    memset(login,0,NAME_SIZE+1);
-                    strncpy(login,my_passwd->pw_name,NAME_SIZE);
+    // deep seesion investigation
+    std::list<CUserSession>::iterator   it = sessions.begin();
+    std::list<CUserSession>::iterator   ie = sessions.end();
 
-                    // only regular users
-                    if( (my_passwd != NULL) && (my_passwd->pw_uid > 1000) ){
-                        CSmallString name;
-                        std::string stext = std::string(my_passwd->pw_gecos);
-                        vector<string>  words;
-                        split(words,stext,is_any_of(","));
-                        if( words.size() >= 1 ){
-                            name = words[0];
-                        }
+    while(it != ie){
+        CUserSession ses = *it;
+        CSmallString cmd;
+        bool remote = false;
+        bool x11 = false;
+        bool loctty = false;
+        bool vnc = false;
 
-                        if( xseat < MAX_TTYS ){
-                            strncpy(XUserName[xseat],name,NAME_SIZE-1);
-                            strncpy(XLoginName[xseat],login,NAME_SIZE-1);
-                            xseat++;
-                            NumOfXUsers++;
-                        }
-                    }
-                }
+        cmd << "/bin/loginctl show-session " << ses.SessionID;
+        FILE* p_sf = popen(cmd,"r");
+        if( p_sf ){
+
+            CSmallString buffer;
+            while( buffer.ReadLineFromFile(p_sf,true,true) ){
+                if( buffer.FindSubString("Type=x11") != -1 ) x11 = true;
+                if( buffer.FindSubString("Remote=yes") != -1 ) remote = true;
+                if( buffer.FindSubString(active_tty) != -1 ) loctty = true;
+            }
+            pclose(p_sf);
+        }
+
+        cmd = NULL;
+        cmd << "/bin/loginctl session-status " << ses.SessionID;
+        p_sf = popen(cmd,"r");
+        if( p_sf ){
+            CSmallString buffer;
+            buffer.SetLength(BUFFER_LEN);   // +1 for \0 is added interanally
+            while( buffer.ReadLineFromFile(p_sf,true,true) ){
+                if( buffer.FindSubString("Xvnc") != -1 ) vnc = true;
+            }
+            pclose(p_sf);
+        }
+
+        if( (remote == false) && (x11 == true) ){
+            if( NumOfLocalUsers < MAX_TTYS ){
+                strncpy(LocalUserName[NumOfLocalUsers],ses.UserName,NAME_SIZE-1);
+                strncpy(LocalLoginName[NumOfLocalUsers],ses.LoginName,NAME_SIZE-1);
+                NumOfLocalUsers++;
+            }
+            if( loctty ){
+                strncpy(ActiveLocalUserName,ses.UserName,NAME_SIZE-1);
+                strncpy(ActiveLocalLoginName,ses.LoginName,NAME_SIZE-1);
             }
         }
-        closedir(x_dir);
+        if( remote == true ){
+            if( NumOfRemoteUsers < MAX_TTYS ){
+                strncpy(RemoteUserName[NumOfRemoteUsers],ses.UserName,NAME_SIZE-1);
+                strncpy(RemoteLoginName[NumOfRemoteUsers],ses.LoginName,NAME_SIZE-1);
+                NumOfRemoteUsers++;
+                if( vnc == true ) NumOfVNCRemoteUsers++;
+            }
+        }
+
+        it++;
     }
 
 // finalize -----------------------
@@ -209,17 +212,21 @@ void CStatDatagram::SetDatagram(void)
             CheckSum += (unsigned char)LocalLoginName[k][i];
         }
     }
+    for(size_t i=0; i < NAME_SIZE; i++){
+        CheckSum += (unsigned char)ActiveLocalUserName[i];
+    }
+    for(size_t i=0; i < NAME_SIZE; i++){
+        CheckSum += (unsigned char)ActiveLocalLoginName[i];
+    }
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
-            CheckSum += (unsigned char)XUserName[k][i];
-            CheckSum += (unsigned char)XLoginName[k][i];
+            CheckSum += (unsigned char)RemoteUserName[k][i];
+            CheckSum += (unsigned char)RemoteLoginName[k][i];
         }
     }
-
-    CheckSum += ActiveTTY;
-    CheckSum += NumOfIUsers;
-    CheckSum += NumOfXUsers;
-    CheckSum += NumOfAUsers;
+    CheckSum += NumOfLocalUsers;
+    CheckSum += NumOfRemoteUsers;
+    CheckSum += NumOfVNCRemoteUsers;
     CheckSum += TimeStamp;
 }
 
@@ -242,17 +249,23 @@ bool CStatDatagram::IsValid(void)
             checksum += (unsigned char)LocalLoginName[k][i];
         }
     }
+    for(size_t i=0; i < NAME_SIZE; i++){
+        checksum += (unsigned char)ActiveLocalUserName[i];
+    }
+    for(size_t i=0; i < NAME_SIZE; i++){
+        checksum += (unsigned char)ActiveLocalLoginName[i];
+    }
+
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
-            checksum += (unsigned char)XUserName[k][i];
-            checksum += (unsigned char)XLoginName[k][i];
+            checksum += (unsigned char)RemoteUserName[k][i];
+            checksum += (unsigned char)RemoteLoginName[k][i];
         }
     }
 
-    checksum += ActiveTTY;
-    checksum += NumOfIUsers;
-    checksum += NumOfXUsers;
-    checksum += NumOfAUsers;
+    checksum += NumOfLocalUsers;
+    checksum += NumOfRemoteUsers;
+    checksum += NumOfVNCRemoteUsers;
     checksum += TimeStamp;
 
     return( checksum == CheckSum );
@@ -265,10 +278,9 @@ void CStatDatagram::PrintInfo(std::ostream& vout)
     vout << "Node  = " << GetShortNodeName() << endl;
     vout << "User  = " << GetLocalUserName() << endl;
     vout << "Login = " << GetLocalLoginName() << endl;
-    vout << "ATTY  = " << ActiveTTY << endl;
-    vout << "I#U   = " << NumOfIUsers << endl;
-    vout << "T#U   = " << NumOfAUsers << endl;
-    vout << "X#U   = " << NumOfXUsers << endl;
+    vout << "#L    = " << NumOfLocalUsers << endl;
+    vout << "#R    = " << NumOfRemoteUsers << endl;
+    vout << "#VNC  = " << NumOfVNCRemoteUsers << endl;
 }
 
 //------------------------------------------------------------------------------
@@ -297,24 +309,14 @@ CSmallString CStatDatagram::GetNodeName(void)
 
 CSmallString CStatDatagram::GetLocalUserName(void)
 {
-    if( (ActiveTTY > 0) && (ActiveTTY <= MAX_TTYS) ){
-        size_t id = ActiveTTY-1;
-        LocalUserName[id][NAME_SIZE-1] = '\0';
-        return(LocalUserName[id]);
-    }
-    return("");
+    return(ActiveLocalUserName);
 }
 
 //------------------------------------------------------------------------------
 
 CSmallString CStatDatagram::GetLocalLoginName(void)
 {
-    if( (ActiveTTY > 0) && (ActiveTTY <= MAX_TTYS) ){
-        size_t id = ActiveTTY-1;
-        LocalLoginName[id][NAME_SIZE-1] = '\0';
-        return(LocalLoginName[id]);
-    }
-    return("");
+    return(ActiveLocalLoginName);
 }
 
 //------------------------------------------------------------------------------
@@ -341,22 +343,22 @@ CSmallString CStatDatagram::GetLocalLoginName(int id)
 
 //------------------------------------------------------------------------------
 
-CSmallString CStatDatagram::GetXUserName(int id)
+CSmallString CStatDatagram::GetRemoteUserName(int id)
 {
     if( (id >= 0) && (id < MAX_TTYS) ){
-        XUserName[id][NAME_SIZE-1] = '\0';
-        return(XUserName[id]);
+        RemoteUserName[id][NAME_SIZE-1] = '\0';
+        return(RemoteUserName[id]);
     }
     return("");
 }
 
 //------------------------------------------------------------------------------
 
-CSmallString CStatDatagram::GetXLoginName(int id)
+CSmallString CStatDatagram::GetRemoteLoginName(int id)
 {
     if( (id >= 0) && (id < MAX_TTYS) ){
-        XLoginName[id][NAME_SIZE-1] = '\0';
-        return(XLoginName[id]);
+        RemoteLoginName[id][NAME_SIZE-1] = '\0';
+        return(RemoteLoginName[id]);
     }
     return("");
 }

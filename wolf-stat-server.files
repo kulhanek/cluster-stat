@@ -10,7 +10,7 @@ src/bin/wolf-stat-server/StatMainHeaderConfig.hpp
 src/bin/wolf-stat-server/StatServer.cpp
 src/bin/wolf-stat-server/StatServer.hpp
 src/bin/wolf-stat-server/_Debug.cpp
-src/bin/wolf-stat-server/_ListXSeats.cpp
+src/bin/wolf-stat-server/_ListAllSeats.cpp
 src/bin/wolf-stat-server/prefix.h
 src/bin/wolf-stat-server/prefix.c
 CMakeClean.sh

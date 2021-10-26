@@ -38,7 +38,7 @@ using namespace boost;
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CFCGIStatServer::_ListXSeats(CFCGIRequest& request)
+bool CFCGIStatServer::_ListAllSeats(CFCGIRequest& request)
 {
     NodesMutex.Lock();
 
@@ -64,15 +64,32 @@ bool CFCGIStatServer::_ListXSeats(CFCGIRequest& request)
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(dtg.GetShortNodeName()); // node name
 
-        if( dtg.NumOfXUsers > 0 ){
+        request.OutStream.PutChar(';');
+        request.OutStream.PutStr(CSmallString(dtg.NumOfLocalUsers));
+        request.OutStream.PutChar(',');
+        request.OutStream.PutStr(CSmallString(dtg.NumOfRemoteUsers));
+        request.OutStream.PutChar(',');
+        request.OutStream.PutStr(CSmallString(dtg.NumOfVNCRemoteUsers));
+
+        if( (dtg.NumOfLocalUsers > 0) || (dtg.NumOfRemoteUsers > 0) ){
             request.OutStream.PutChar(';');
-            for(int i=0; i < dtg.NumOfXUsers; i++){
-                if( i > 0 ) request.OutStream.PutStr("|");
-                request.OutStream.PutStr(dtg.GetXUserName(i));
-                request.OutStream.PutStr(" (");
-                request.OutStream.PutStr(dtg.GetXLoginName(i));
-                request.OutStream.PutStr(")");
-            }
+        }
+        bool delimit = false;
+        for(int i=0; i < dtg.NumOfLocalUsers; i++){
+            if( i > 0 ) delimit = true;
+            if( delimit ) request.OutStream.PutStr("|");
+            request.OutStream.PutStr(dtg.GetLocalUserName(i));
+            request.OutStream.PutStr(" (");
+            request.OutStream.PutStr(dtg.GetLocalLoginName(i));
+            request.OutStream.PutStr(")");
+        }
+        for(int i=0; i < dtg.NumOfRemoteUsers; i++){
+            if( i > 0 ) delimit = true;
+            if( delimit ) request.OutStream.PutStr("|");
+            request.OutStream.PutStr(dtg.GetRemoteUserName(i));
+            request.OutStream.PutStr(" (");
+            request.OutStream.PutStr(dtg.GetRemoteLoginName(i));
+            request.OutStream.PutStr(")");
         }
 
         request.OutStream.PutChar('\n');
