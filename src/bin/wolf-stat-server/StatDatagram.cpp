@@ -250,6 +250,13 @@ void CStatDatagram::SetDatagram(bool powerdown)
 
 //------------------------------------------------------------------------------
 
+void CStatDatagram::SetShortNodeName(const CSmallString& name)
+{
+    strncpy(NodeName,name,NAME_SIZE-1);
+}
+
+//------------------------------------------------------------------------------
+
 bool CStatDatagram::IsValid(void)
 {
     int checksum = 0;

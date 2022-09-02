@@ -63,7 +63,7 @@ bool CFCGIStatServer::_RemoteAccess(CFCGIRequest& request)
 
 bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallString& node)
 {
-    request.Params.PrintParams();
+    //request.Params.PrintParams();
 
     CSmallString user;
     user = request.Params.GetValue("REMOTE_USER");
@@ -95,8 +95,11 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         time.GetActualTimeAndDate();
         Nodes[string(node)].PowerOnTime = time.GetSecondsFromBeginning();
     } else {
-//        CCompNode node;
-//        node.Basic.
+        CCompNode data;
+        data.Basic.SetShortNodeName(node);
+        data.InPowerOnMode = false;
+        data.PowerOnTime  = 0;
+        Nodes[string(node)] = data;
     }
 
     NodesMutex.Unlock();

@@ -42,6 +42,8 @@
 
 class CCompNode {
 public:
+    CCompNode(void);
+public:
     CStatDatagram   Basic;
     bool            InPowerOnMode;
     int             PowerOnTime;

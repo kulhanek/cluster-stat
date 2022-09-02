@@ -39,6 +39,7 @@ public:
 
 // setters ---------------------------------------------------------------------
     void SetDatagram(bool powerdown=false);
+    void SetShortNodeName(const CSmallString& name);
 
 // getters ---------------------------------------------------------------------
     CSmallString GetShortNodeName(void);
