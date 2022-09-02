@@ -97,8 +97,9 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
     } else {
         CCompNode data;
         data.Basic.SetShortNodeName(node);
-        data.InPowerOnMode = false;
-        data.PowerOnTime  = 0;
+        data.InPowerOnMode = true;
+        CSmallTimeAndDate time;
+        data.PowerOnTime  = time.GetSecondsFromBeginning();
         Nodes[string(node)] = data;
     }
 
