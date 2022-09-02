@@ -125,7 +125,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         }
 
         diff = ctime.GetSecondsFromBeginning() - node.PowerOnTime;
-        if( (node.InPowerOnMode) && (diff > 300) ){
+        if( node.InPowerOnMode ){
             if( diff < 300 ){
                 status = "poweron";
             } else {
