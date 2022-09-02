@@ -34,8 +34,18 @@
 #include <SimpleMutex.hpp>
 #include <TemplateParams.hpp>
 #include <StatServer.hpp>
+#include <SmallTimeAndDate.hpp>
 #include <map>
 #include <string>
+
+//------------------------------------------------------------------------------
+
+class CCompNode {
+public:
+    CStatDatagram   Basic;
+    bool            InPowerOnMode;
+    int             PowerOnTime;
+};
 
 //------------------------------------------------------------------------------
 
@@ -69,7 +79,7 @@ private:
     int                 StatPort;
     unsigned int        MaxNodes;
 
-    std::map<std::string,CStatDatagram> Nodes;
+    std::map<std::string,CCompNode> Nodes;
 
     static  void CtrlCSignalHandler(int signal);
     virtual bool AcceptRequest(void);
@@ -78,6 +88,10 @@ private:
     bool _Error(CFCGIRequest& request);
     bool _ListLoggedUsers(CFCGIRequest& request);
     bool _ListAllSeats(CFCGIRequest& request);
+    bool _RemoteAccess(CFCGIRequest& request);
+    bool _RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallString& node);
+    bool _RemoteAccessStartVNC(CFCGIRequest& request,const CSmallString& node);
+    bool _RemoteAccessList(CFCGIRequest& request);
     bool _Debug(CFCGIRequest& request);
 
     bool ProcessCommonParams(CFCGIRequest& request,

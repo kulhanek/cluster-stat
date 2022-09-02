@@ -4,3 +4,5 @@ etc
 src/bin
 src/bin/wolf-stat-client
 share
+src/bin/wolf-stat-server/pbs
+src/bin/wolf-stat-server/batchsys

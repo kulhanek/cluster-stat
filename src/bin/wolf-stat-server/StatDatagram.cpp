@@ -60,12 +60,13 @@ CStatDatagram::CStatDatagram(void)
     NumOfRemoteUsers = 0;
     NumOfVNCRemoteUsers = 0;
     TimeStamp = 0;
+    PowerDown = 0;
     CheckSum = 0;
 }
 
 //------------------------------------------------------------------------------
 
-void CStatDatagram::SetDatagram(void)
+void CStatDatagram::SetDatagram(bool powerdown)
 {
     memset(Header,0,HEADER_SIZE);
     memset(NodeName,0,NAME_SIZE);
@@ -201,6 +202,11 @@ void CStatDatagram::SetDatagram(void)
         it++;
     }
 
+    PowerDown = 0;
+    if( powerdown ){
+        PowerDown = 1;
+    }
+
 // finalize -----------------------
     CSmallTimeAndDate time;
     time.GetActualTimeAndDate();
@@ -238,6 +244,7 @@ void CStatDatagram::SetDatagram(void)
     CheckSum += NumOfLocalUsers;
     CheckSum += NumOfRemoteUsers;
     CheckSum += NumOfVNCRemoteUsers;
+    CheckSum += PowerDown;
     CheckSum += TimeStamp;
 }
 
@@ -281,6 +288,7 @@ bool CStatDatagram::IsValid(void)
     checksum += NumOfLocalUsers;
     checksum += NumOfRemoteUsers;
     checksum += NumOfVNCRemoteUsers;
+    checksum += PowerDown;
     checksum += TimeStamp;
 
     return( checksum == CheckSum );
@@ -393,6 +401,13 @@ char CStatDatagram::GetRemoteLoginType(int id)
 int CStatDatagram::GetTimeStamp(void)
 {
     return(TimeStamp);
+}
+
+//------------------------------------------------------------------------------
+
+bool CStatDatagram::IsDown(void)
+{
+    return(PowerDown == 1);
 }
 
 //------------------------------------------------------------------------------

@@ -1,7 +1,10 @@
 // =============================================================================
 //  WOLF Stat Server
 // -----------------------------------------------------------------------------
-//     Copyright (C) 2020 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -38,53 +41,91 @@ using namespace boost;
 //------------------------------------------------------------------------------
 //==============================================================================
 
-bool CFCGIStatServer::_Debug(CFCGIRequest& request)
+bool CFCGIStatServer::_RemoteAccess(CFCGIRequest& request)
 {
-    // write response
-    stringstream str;
-    str << "<html><body>" << endl;
+    CSmallString node;
 
+    node = request.Params.GetValue("wakeonlan");
+    if( node != NULL ){
+        return(_RemoteAccessWakeOnLAN(request,node));
+    }
+
+    node = request.Params.GetValue("startvnc");
+    if( node != NULL ){
+        return(_RemoteAccessStartVNC(request,node));
+    }
+
+    // default is to list nodes
+    return(_RemoteAccessList(request));
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallString& node)
+{
+// check if node is only name of the node
+    for(int i=0; i < (int)node.GetLength(); i++){
+        if( isalnum(node[i]) == 0 ) {
+            request.FinishRequest();
+            return(false);
+        }
+    }
+
+// call wolf-poweon script
+    CSmallString cmd;
+    cmd = "/opt/wolf-poweron/wolf-poweron --nowait \"";
+    cmd << node << "\"";
+    system(cmd);
+
+// mark the node
+
+// send the node list
+    _RemoteAccessList(request);
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallString& node)
+{
+    request.FinishRequest();
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
+{
     NodesMutex.Lock();
 
     std::map<std::string,CCompNode>::iterator it = Nodes.begin();
     std::map<std::string,CCompNode>::iterator ie = Nodes.end();
 
     while( it != ie ){
-        CStatDatagram dtg = it->second.Basic;
+        CCompNode node = it->second;
 
         // check node status
         CSmallString status = "up";
         // check timestamp from user stat file
-        CSmallTimeAndDate stime(dtg.GetTimeStamp());
+        CSmallTimeAndDate stime(node.Basic.GetTimeStamp());
         CSmallTimeAndDate ctime;
         ctime.GetActualTimeAndDate();
         CSmallTime diff = ctime - stime;
-        if( diff > 300 ){  // skew of 300 seconds
+        if(  (diff > 180) || node.Basic.IsDown() ){  // skew of 180 seconds
             status = "down";
-        }      
-        str << "<h1>" << dtg.GetShortNodeName() << "</h1>" << endl;
-        str << "<p>Status: " << status << "</p>" << endl;
-        str << "<p>Number of local sessions : " << dtg.NumOfLocalUsers << "</p>" << endl;
-        str << "<ol>" << endl;
-        for(int i=0; i < MAX_TTYS; i++){
-            str << "<li>" << dtg.GetLocalLoginName(i) << " (" << dtg.GetLocalUserName(i) << ")</li>" << endl;
         }
-        str << "</ol>" << endl;
-        str << "<p>Number of remote sessions: " << dtg.NumOfRemoteUsers << "</p>" << endl;
-        str << "<p>Number of VNC sessions   : " << dtg.NumOfVNCRemoteUsers << "</p>" << endl;
-        str << "<ol>" << endl;
-        for(int i=0; i < MAX_TTYS; i++){
-            str << "<li>" << dtg.GetRemoteLoginName(i) << " (" << dtg.GetRemoteUserName(i) << ")</li>" << endl;
+        if( node.InPowerOnMode ){
+            status = "poweron";
         }
-        str << "</ol>" << endl;
+
+        // write response
+        request.OutStream.PutStr(status); // node status
+        request.OutStream.PutChar('\n');
+
         it++;
     }
 
     NodesMutex.Unlock();
-
-    str << "</body></html>" << endl;
-
-    request.OutStream.PutStr(str.str());
 
     // finalize request
     request.FinishRequest();

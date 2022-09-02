@@ -45,11 +45,11 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
 {
     NodesMutex.Lock();
 
-    std::map<std::string,CStatDatagram>::iterator it = Nodes.begin();
-    std::map<std::string,CStatDatagram>::iterator ie = Nodes.end();
+    std::map<std::string,CCompNode>::iterator it = Nodes.begin();
+    std::map<std::string,CCompNode>::iterator ie = Nodes.end();
 
     while( it != ie ){
-        CStatDatagram dtg = it->second;
+        CStatDatagram dtg = it->second.Basic;
 
         // check node status
         CSmallString status = "up";
@@ -58,7 +58,7 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
         CSmallTimeAndDate ctime;
         ctime.GetActualTimeAndDate();
         CSmallTime diff = ctime - stime;
-        if( diff > 300 ){  // skew of 300 seconds
+        if( (diff > 180) || dtg.IsDown() ){  // skew of 180 seconds
             status = "down";
         }
 

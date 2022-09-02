@@ -38,7 +38,7 @@ public:
     CStatDatagram(void);
 
 // setters ---------------------------------------------------------------------
-    void SetDatagram(void);
+    void SetDatagram(bool powerdown=false);
 
 // getters ---------------------------------------------------------------------
     CSmallString GetShortNodeName(void);
@@ -51,6 +51,7 @@ public:
     CSmallString GetRemoteLoginName(int id);
     char         GetRemoteLoginType(int id);
     int          GetTimeStamp(void);
+    bool         IsDown(void);
     void         PrintInfo(std::ostream& vout);
     bool         IsValid(void);
 
@@ -71,6 +72,7 @@ private:
     char    RemoteLoginName[MAX_TTYS][NAME_SIZE];
     char    RemoteLoginType[MAX_TTYS];
     // service information
+    int     PowerDown;
     int     TimeStamp;                      // time of "meassurement"
     int     CheckSum;
 

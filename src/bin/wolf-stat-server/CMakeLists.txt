@@ -2,6 +2,9 @@
 # WOLF CMake File
 # ==============================================================================
 
+INCLUDE_DIRECTORIES(batchsys)
+INCLUDE_DIRECTORIES(batchsys/pbspro)
+
 # program objects --------------------------------------------------------------
 SET(PROG_SRC
         prefix.c
@@ -13,8 +16,14 @@ SET(PROG_SRC
         ServerWatcher.cpp
         _ListLoggedUsers.cpp
         _ListAllSeats.cpp
+        _RemoteAccess.cpp
         _Debug.cpp
         _Error.cpp
+#        batchsys/PBSProJob.cpp
+#        batchsys/PBSProNode.cpp
+#        batchsys/PBSProQueue.cpp
+#        batchsys/PBSProAttr.cpp
+#        batchsys/PBSProServer.cpp
         )
 
 # final build ------------------------------------------------------------------

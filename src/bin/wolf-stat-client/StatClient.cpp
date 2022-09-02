@@ -88,7 +88,7 @@ bool CStatClient::Run(void)
     signal(SIGTERM,CtrlCSignalHandler);
 
     do {
-        Datagram.SetDatagram();
+        Datagram.SetDatagram(false);
         vout << high;
         Datagram.PrintInfo(vout);
 
@@ -101,6 +101,16 @@ bool CStatClient::Run(void)
         }
 
     } while( (Terminated == false) && (Options.GetOptInterval() != 0) );
+
+// send termination datagram
+    Datagram.SetDatagram(true);
+    vout << high;
+    Datagram.PrintInfo(vout);
+
+    if( SendDataToServer(Options.GetArgServerName(),Options.GetOptPort()) == false ) {
+        ES_ERROR("unable to send termination datagram");
+        return(false);
+    }
 
     return(true);
 }
@@ -124,6 +134,7 @@ void CStatClient::CtrlCSignalHandler(int signal)
     StatClient.vout << endl << endl;
     StatClient.vout << "SIGINT or SIGTERM signal recieved. Initiating server shutdown!" << endl;
     StatClient.vout << "Waiting for server finalization ... " << endl;
+
     StatClient.Terminated = true;
 }
 

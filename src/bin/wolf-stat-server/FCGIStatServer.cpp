@@ -167,14 +167,34 @@ void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
     string node = string(dtg.GetNodeName());
 
     if( MaxNodes == Nodes.size() ){
-        if( Nodes.count(node) == 1 ){
+        // too many nodes and the node is not registered yet
+        if( Nodes.count(node) != 1 ){
             NodesMutex.Unlock();
             ES_ERROR("too many nodes - skiping new registration");
             return;
         }
     }
 
-    Nodes[node] = dtg;
+    if( Nodes.count(node) == 1 ) {
+        // the node is registered
+        Nodes[node].Basic = dtg;
+
+        // is it still in poweron mode?
+        if( Nodes[node].InPowerOnMode ){
+            if( Nodes[node].PowerOnTime < dtg.GetTimeStamp() ){
+                Nodes[node].InPowerOnMode = false;
+            }
+        }
+
+    } else {
+        // new registration
+        CCompNode data;
+        data.Basic          = dtg;
+        data.InPowerOnMode  = false;
+        data.PowerOnTime    = 0;
+
+        Nodes[node] = data;
+    }
 
     NodesMutex.Unlock();
 }
@@ -214,6 +234,9 @@ bool CFCGIStatServer::AcceptRequest(void)
     }
     if( action == "allseats" ) {
         result = _ListAllSeats(request);
+    }
+    if( action == "remote" ) {
+        result = _RemoteAccess(request);
     }
     if( action == "debug" ) {
         result = _Debug(request);
