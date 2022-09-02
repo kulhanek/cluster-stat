@@ -189,12 +189,9 @@ void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
         // the node is registered
         Nodes[node].Basic = dtg;
 
-        // is it still in poweron mode?
-        if( Nodes[node].InPowerOnMode ){
-            if( Nodes[node].PowerOnTime < dtg.GetTimeStamp() ){
-                Nodes[node].InPowerOnMode = false;
-            }
-        }
+        // clear power on status
+        Nodes[node].InPowerOnMode  = false;
+        Nodes[node].PowerOnTime    = 0;
 
     } else {
         // new registration
