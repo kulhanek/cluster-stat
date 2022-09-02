@@ -174,7 +174,7 @@ void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
 {
     NodesMutex.Lock();
 
-    string node = string(dtg.GetNodeName());
+    string node = string(dtg.GetShortNodeName());
 
     if( MaxNodes == Nodes.size() ){
         // too many nodes and the node is not registered yet
