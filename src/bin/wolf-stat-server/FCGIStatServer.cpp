@@ -300,6 +300,8 @@ bool CFCGIStatServer::LoadConfig(void)
     CFileName    config_path;
 
     config_path = ETCDIR;
+    // FIXME
+    config_path = "/opt/wolf-stat-server/3.0/etc";
     config_path = config_path / "wolf-stat-server.xml";
 
     CXMLParser xml_parser;
