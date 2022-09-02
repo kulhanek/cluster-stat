@@ -78,6 +78,16 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
     system(cmd);
 
 // mark the node
+    NodesMutex.Lock();
+
+    if( Nodes.count(string(node)) == 1 ){
+        Nodes[string(node)].InPowerOnMode = true;
+        CSmallTimeAndDate time;
+        time.GetActualTimeAndDate();
+        Nodes[string(node)].PowerOnTime = time.GetSecondsFromBeginning();
+    }
+
+    NodesMutex.Unlock();
 
 // send the node list
     _RemoteAccessList(request);
@@ -120,6 +130,8 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         // write response
         request.OutStream.PutStr(status); // node status
+        request.OutStream.PutChar(';');
+        request.OutStream.PutStr(node.Basic.GetShortNodeName()); // node name
         request.OutStream.PutChar('\n');
 
         it++;
