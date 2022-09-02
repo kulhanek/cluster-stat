@@ -63,9 +63,15 @@ bool CFCGIStatServer::_RemoteAccess(CFCGIRequest& request)
 
 bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallString& node)
 {
+    CSmallString user;
+    user = request.Params.GetValue("REMOTE_USER");
+
 // check if node is only name of the node
     for(int i=0; i < (int)node.GetLength(); i++){
         if( isalnum(node[i]) == 0 ) {
+            CSmallString error;
+            error << "illegal node name (" << node << ") from USER (" << user << ")";
+            ES_ERROR(error);
             request.FinishRequest();
             return(false);
         }
@@ -75,6 +81,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
     CSmallString cmd;
     cmd = "/opt/wolf-poweron/wolf-poweron --nowait \"";
     cmd << node << "\"";
+    cout << "> User: " << user << endl;
     system(cmd);
 
 // mark the node
@@ -85,6 +92,9 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         CSmallTimeAndDate time;
         time.GetActualTimeAndDate();
         Nodes[string(node)].PowerOnTime = time.GetSecondsFromBeginning();
+    } else {
+//        CCompNode node;
+//        node.Basic.
     }
 
     NodesMutex.Unlock();
