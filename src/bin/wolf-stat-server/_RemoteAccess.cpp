@@ -63,7 +63,7 @@ bool CFCGIStatServer::_RemoteAccess(CFCGIRequest& request)
 
 bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallString& node)
 {
-    //request.Params.PrintParams();
+    request.Params.PrintParams();
 
     CSmallString user;
     user = request.Params.GetValue("REMOTE_USER");
