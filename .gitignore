@@ -1,2 +1,8 @@
+*.mod
+*.cmake
+CMakeCache.txt
+CMakeFiles
+DartConfiguration.tcl
+Makefile
 /bin/
 wolf-stat-server.creator.user
