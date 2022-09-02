@@ -65,7 +65,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 {
     request.Params.PrintParams();
 
-    sleep(20);
+    sleep(120);
 
     CSmallString user;
     user = request.Params.GetValue("REMOTE_USER");
