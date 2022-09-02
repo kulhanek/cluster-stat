@@ -117,15 +117,21 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         // check node status
         CSmallString status = "up";
         // check timestamp from user stat file
-        CSmallTimeAndDate stime(node.Basic.GetTimeStamp());
         CSmallTimeAndDate ctime;
         ctime.GetActualTimeAndDate();
-        CSmallTime diff = ctime - stime;
+        int diff = ctime.GetSecondsFromBeginning() - node.Basic.GetTimeStamp();
         if(  (diff > 180) || node.Basic.IsDown() ){  // skew of 180 seconds
             status = "down";
         }
-        if( node.InPowerOnMode ){
-            status = "poweron";
+
+        diff = ctime.GetSecondsFromBeginning() - node.PowerOnTime;
+        if( (node.InPowerOnMode) && (diff > 300) ){
+            if( diff < 300 ){
+                status = "poweron";
+            } else {
+                status = "down";
+                Nodes[string(node.Basic.GetShortNodeName())].InPowerOnMode = false;
+            }
         }
 
         // write response
