@@ -208,13 +208,13 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         CSmallString rdsk_url = "";
         if( CFileSystem::IsSocket(socket) ){
             status = "vnc";
-            rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&path=/bluezone/rdsk/";
+            rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/";
             rdsk_url << ruser << "/";
             rdsk_url << node.Basic.GetNodeName();
             if( DomainName != NULL ){
                 rdsk_url << "." << DomainName;
             }
-            rdsk_url << "&resize=scale&autoconnect=true";
+            rdsk_url << "&resize=remote&autoconnect=true";
             Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
         }
 
