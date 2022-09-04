@@ -214,6 +214,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( DomainName != NULL ){
                 rdsk_url << "." << DomainName;
             }
+            rdsk_url << "&resize=scale&autoconnect=true";
             Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
         }
 
