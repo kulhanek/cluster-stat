@@ -155,7 +155,8 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
         CSmallString rdsk_url = "";
-        if( CFileSystem::IsFile(socket) ){
+        cout << socket << endl;
+        if( CFileSystem::IsSocket(socket) ){
             status = "rdsk";
             rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/";
             rdsk_url << ruser << "/";
