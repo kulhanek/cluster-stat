@@ -74,7 +74,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     FCGIPort = 32597;
     StatPort = 32598;
     MaxNodes = 100;
-    RDSKPath = "/var/www/html/bluezone/rdsks";
+    RDSKPath = "/var/www/html/bluezone/rdsk";
     DomainName = "ncbr.muni.cz";
 }
 
