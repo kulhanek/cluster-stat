@@ -153,6 +153,19 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
+        bool occupy = false;
+        if( node.Basic.NumOfLocalUsers > 0 ){
+            occupy = true;
+        }
+        for(int i=0; i < node.Basic.NumOfRemoteUsers; i++){
+            if( node.Basic.GetRemoteLoginType(i) == 'V' ){
+                occupy = true;
+            }
+        }
+        if( occupy ){
+            status = "occ";
+        }
+
         CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
         if( DomainName != NULL ){
             socket = socket + "." + DomainName;
@@ -166,20 +179,6 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( DomainName != NULL ){
                 rdsk_url << "." << DomainName;
             }
-        }
-
-        bool occupy = false;
-        if( node.Basic.NumOfLocalUsers > 0 ){
-            occupy = true;
-        }
-        for(int i=0; i < node.Basic.NumOfRemoteUsers; i++){
-            if( node.Basic.GetRemoteLoginType(i) == 'V' ){
-                occupy = true;
-            }
-        }
-        if( occupy ){
-            status = "occ";
-            rdsk_url = "";
         }
 
         // write response
