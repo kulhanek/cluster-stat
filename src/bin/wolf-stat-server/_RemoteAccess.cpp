@@ -208,7 +208,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         CSmallString rdsk_url = "";
         if( CFileSystem::IsSocket(socket) ){
             status = "vnc";
-            rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/";
+            rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&path=/bluezone/rdsk/";
             rdsk_url << ruser << "/";
             rdsk_url << node.Basic.GetNodeName();
             if( DomainName != NULL ){
