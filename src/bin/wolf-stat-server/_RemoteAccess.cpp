@@ -66,14 +66,14 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 {
 //    request.Params.PrintParams();
 
-    CSmallString user;
-    user = request.Params.GetValue("REMOTE_USER");
+    CSmallString ruser;
+    ruser = request.Params.GetValue("REMOTE_USER");
 
 // check if node is only name of the node
     for(int i=0; i < (int)node.GetLength(); i++){
         if( isalnum(node[i]) == 0 ) {
             CSmallString error;
-            error << "illegal node name (" << node << ") from USER (" << user << ")";
+            error << "illegal node name (" << node << ") from USER (" << ruser << ")";
             ES_ERROR(error);
             request.FinishRequest();
             return(false);
@@ -84,7 +84,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
     CSmallString cmd;
     cmd = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"";
     cmd << node << "\"";
-    cout << "> User: " << user << endl;
+    cout << "> User: " << ruser << endl;
     system(cmd);
 
 // mark the node
@@ -115,7 +115,32 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallString& node)
 {
-    request.FinishRequest();
+    CSmallString ruser = request.Params.GetValue("REMOTE_USER");
+
+// start VNC
+    cout << "start VNC: " << ruser << "@" << node << endl;
+
+    CSmallTimeAndDate ctime;
+    ctime.GetActualTimeAndDate();
+
+// mark the node
+    NodesMutex.Lock();
+
+    if( Nodes.count(string(node)) == 1 ){
+        Nodes[string(node)].InStartVNCMode = true;
+        Nodes[string(node)].StartVNCTime   = ctime.GetSecondsFromBeginning();
+    } else {
+        CCompNode data;
+        data.Basic.SetShortNodeName(node);
+        data.InStartVNCMode = true;
+        data.StartVNCTime   = ctime.GetSecondsFromBeginning();
+        Nodes[string(node)] = data;
+    }
+
+    NodesMutex.Unlock();
+
+// send the node list
+    _RemoteAccessList(request);
     return(true);
 }
 
@@ -153,6 +178,15 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
+        diff = ctime.GetSecondsFromBeginning() - node.StartVNCTime;
+        if( node.InStartVNCMode ){
+            if( diff < 300 ){
+                status = "startvnc";
+            } else {
+                Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
+            }
+        }
+
         bool occupy = false;
         if( node.Basic.NumOfLocalUsers > 0 ){
             occupy = true;
@@ -164,6 +198,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         }
         if( occupy ){
             status = "occ";
+            Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
         }
 
         CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
@@ -172,13 +207,14 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         }
         CSmallString rdsk_url = "";
         if( CFileSystem::IsSocket(socket) ){
-            status = "rdsk";
+            status = "vnc";
             rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/";
             rdsk_url << ruser << "/";
             rdsk_url << node.Basic.GetNodeName();
             if( DomainName != NULL ){
                 rdsk_url << "." << DomainName;
             }
+            Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
         }
 
         // write response

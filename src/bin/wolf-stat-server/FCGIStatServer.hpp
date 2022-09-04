@@ -47,6 +47,9 @@ public:
     CStatDatagram   Basic;
     bool            InPowerOnMode;
     int             PowerOnTime;
+
+    bool            InStartVNCMode;
+    int             StartVNCTime;
 };
 
 //------------------------------------------------------------------------------

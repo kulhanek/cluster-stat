@@ -60,6 +60,9 @@ CCompNode::CCompNode(void)
 {
     InPowerOnMode = false;
     PowerOnTime = 0;
+
+    InStartVNCMode = false;
+    StartVNCTime = 0;
 }
 
 //==============================================================================
