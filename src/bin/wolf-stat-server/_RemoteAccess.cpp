@@ -25,6 +25,7 @@
 #include <TemplateParams.hpp>
 #include <ErrorSystem.hpp>
 #include <FileName.hpp>
+#include <FileSystem.hpp>
 #include <SmallTimeAndDate.hpp>
 #include <SmallTime.hpp>
 #include <DirectoryEnum.hpp>
@@ -152,9 +153,9 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
-        CSmallString socket = RDSKPath / ruser / node.Basic.GetNodeName();
+        CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
         CSmallString rdsk_url = "";
-        if( CFileName::IsFile(socket) ){
+        if( CFileSystem::IsFile(socket) ){
             status = "rdsk";
             rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/";
             rdsk_url << ruser << "/";
