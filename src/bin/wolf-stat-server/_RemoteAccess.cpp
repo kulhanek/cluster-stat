@@ -81,7 +81,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 // call wolf-poweon script
     CSmallString cmd;
-    cmd = "/opt/wolf-poweron/wolf-poweron --nowait \"";
+    cmd = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"";
     cmd << node << "\"";
     cout << "> User: " << user << endl;
     system(cmd);
@@ -89,17 +89,17 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 // mark the node
     NodesMutex.Lock();
 
+    CSmallTimeAndDate ctime;
+    ctime.GetActualTimeAndDate();
+
     if( Nodes.count(string(node)) == 1 ){
         Nodes[string(node)].InPowerOnMode = true;
-        CSmallTimeAndDate time;
-        time.GetActualTimeAndDate();
-        Nodes[string(node)].PowerOnTime = time.GetSecondsFromBeginning();
+        Nodes[string(node)].PowerOnTime = ctime.GetSecondsFromBeginning();
     } else {
         CCompNode data;
         data.Basic.SetShortNodeName(node);
         data.InPowerOnMode = true;
-        CSmallTimeAndDate time;
-        data.PowerOnTime  = time.GetSecondsFromBeginning();
+        data.PowerOnTime  = ctime.GetSecondsFromBeginning();
         Nodes[string(node)] = data;
     }
 
@@ -122,6 +122,8 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 
 bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 {
+    CSmallString ruser = request.Params.GetValue("REMOTE_USER");
+
     NodesMutex.Lock();
 
     std::map<std::string,CCompNode>::iterator it = Nodes.begin();
@@ -150,10 +152,21 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
+        CSmallString socket = RDSKPath / ruser / node.Basic.GetNodeName();
+        CSmallString rdsk_url = "";
+        if( CFileName::IsFile(socket) ){
+            status = "rdsk";
+            rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/";
+            rdsk_url << ruser << "/";
+            rdsk_url << node.Basic.GetNodeName();
+        }
+
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(node.Basic.GetShortNodeName()); // node name
+        request.OutStream.PutChar(';');
+        request.OutStream.PutStr(rdsk_url);
         request.OutStream.PutChar('\n');
 
         it++;

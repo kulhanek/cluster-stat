@@ -71,6 +71,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     FCGIPort = 32597;
     StatPort = 32598;
     MaxNodes = 100;
+    RDSKPath = "/var/www/html/bluezone/rdsks/";
 }
 
 //==============================================================================
@@ -327,6 +328,7 @@ bool CFCGIStatServer::LoadConfig(void)
         p_ele->GetAttribute("fcgiport",FCGIPort);
         p_ele->GetAttribute("statport",StatPort);
         p_ele->GetAttribute("maxnodes",MaxNodes);
+        p_ele->GetAttribute("rdskpath",RDSKPath);
     }
 
     vout << "#" << endl;
@@ -334,6 +336,7 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# FCGI Port (fcgiport) = " << FCGIPort << endl;
     vout << "# Stat Port (statport) = " << StatPort << endl;
     vout << "# Max nodes (maxnodes) = " << MaxNodes << endl;
+    vout << "# RDSK Path (rdskpath) = " << RDSKPath << endl;
     vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");

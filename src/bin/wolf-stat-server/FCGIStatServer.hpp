@@ -80,6 +80,7 @@ private:
     int                 FCGIPort;
     int                 StatPort;
     unsigned int        MaxNodes;
+    CSmallString        RDSKPath;
 
     std::map<std::string,CCompNode> Nodes;
 

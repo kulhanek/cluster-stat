@@ -85,7 +85,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
     TimeStamp = 0;
     CheckSum = 0;
 
-    strncpy(Header,"STAT",4);
+    memcpy(Header,"STAT",4);
 
     gethostname(NodeName,NAME_SIZE-1);
 
@@ -167,7 +167,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
         p_sf = popen(cmd,"r");
         if( p_sf ){
             CSmallString buffer;
-            buffer.SetLength(BUFFER_LEN);   // +1 for \0 is added interanally
+            buffer.SetLength(BUFFER_LEN);   // +1 for \0 is added internally
             while( buffer.ReadLineFromFile(p_sf,true,true) ){
                 if( buffer.FindSubString("Xvnc") != -1 ) vnc = true;
             }
