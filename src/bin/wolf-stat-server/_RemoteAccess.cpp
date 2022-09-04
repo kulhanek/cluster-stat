@@ -154,6 +154,9 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         }
 
         CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
+        if( DomainName != NULL ){
+            socket = socket + "." + DomainName;
+        }
         CSmallString rdsk_url = "";
         cout << socket << endl;
         if( CFileSystem::IsSocket(socket) ){

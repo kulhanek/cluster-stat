@@ -71,7 +71,8 @@ CFCGIStatServer::CFCGIStatServer(void)
     FCGIPort = 32597;
     StatPort = 32598;
     MaxNodes = 100;
-    RDSKPath = "/var/www/html/bluezone/rdsks/";
+    RDSKPath = "/var/www/html/bluezone/rdsks";
+    DomainName = "ncbr.muni.cz";
 }
 
 //==============================================================================
@@ -329,6 +330,7 @@ bool CFCGIStatServer::LoadConfig(void)
         p_ele->GetAttribute("statport",StatPort);
         p_ele->GetAttribute("maxnodes",MaxNodes);
         p_ele->GetAttribute("rdskpath",RDSKPath);
+        p_ele->GetAttribute("domain",DomainName);
     }
 
     vout << "#" << endl;
@@ -337,6 +339,7 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# Stat Port (statport) = " << StatPort << endl;
     vout << "# Max nodes (maxnodes) = " << MaxNodes << endl;
     vout << "# RDSK Path (rdskpath) = " << RDSKPath << endl;
+    vout << "# Domain name (domain) = " << DomainName << endl;
     vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");

@@ -81,6 +81,7 @@ private:
     int                 StatPort;
     unsigned int        MaxNodes;
     CFileName           RDSKPath;
+    CFileName           DomainName;
 
     std::map<std::string,CCompNode> Nodes;
 
