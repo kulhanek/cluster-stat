@@ -64,8 +64,6 @@ bool CFCGIStatServer::_RemoteAccess(CFCGIRequest& request)
 
 bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallString& node)
 {
-//    request.Params.PrintParams();
-
     CSmallString ruser;
     ruser = request.Params.GetValue("REMOTE_USER");
 
@@ -115,6 +113,8 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallString& node)
 {
+    request.Params.PrintParams();
+
     CSmallString ruser = request.Params.GetValue("REMOTE_USER");
 
 // start VNC
