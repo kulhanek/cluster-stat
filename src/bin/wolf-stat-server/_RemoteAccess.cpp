@@ -115,6 +115,8 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 {
     request.Params.PrintParams();
 
+    sleep(180);
+
     CSmallString ruser = request.Params.GetValue("REMOTE_USER");
 
 // start VNC
