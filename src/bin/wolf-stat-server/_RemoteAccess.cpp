@@ -216,10 +216,14 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( DomainName != NULL ){
                 rnode << "." << DomainName;
             }
-            str << format(URLTmp)%ruser%rnode;
+            try{
+                str << format(URLTmp)%ruser%rnode;
+            } catch(...) {
+                ES_ERROR("wrong url tmp");
+            }
+
             rdsk_url << str.str();
 
-            rdsk_url << "&resize=remote&autoconnect=true";
             Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
         }
 
