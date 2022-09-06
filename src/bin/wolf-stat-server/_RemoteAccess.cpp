@@ -86,8 +86,16 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 // call wolf-poweon script
     CSmallString cmd;
     stringstream str;
-    str << format(PowerOnCMD)%node;
-    cmd << str.str();
+    try {
+        str << format(PowerOnCMD)%node;
+        cmd << str.str();
+    } catch (...) {
+        CSmallString err;
+        err << "unalble to format startrdsk command '" << StartRDSKCMD << "'";
+        ES_ERROR(err);;
+        cmd = NULL;
+        cmd << "/bin/false";
+    }
 
     cout << "> User: " << ruser << endl;
     int ret = system(cmd);
@@ -142,8 +150,16 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 // start VNC
     CSmallString cmd;
     stringstream str;
-    str << format(StartRDSKCMD)%krb5ccname%ruser%node;
-    cmd << str.str();
+    try{
+        str << format(StartRDSKCMD)%krb5ccname%ruser%node;
+        cmd << str.str();
+    } catch (...) {
+        CSmallString err;
+        err << "unalble to format startrdsk command '" << StartRDSKCMD << "'";
+        ES_ERROR(err);
+        cmd = NULL;
+        cmd << "/bin/false";
+    }
 
     cout << "> Start RDSK: " << ruser << "@" << node << endl;
     int ret = system(cmd);
