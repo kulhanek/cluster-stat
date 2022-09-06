@@ -249,16 +249,18 @@ bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
     // is it socket?
     if( CFileSystem::IsSocket(socket) == false ) return(false);
 
-    // test if it is connected?
-    CSmallString cmd;
-    cmd << "/usr/bin/lsof \"" << socket << "\" 2> /dev/null";
+// FIXME
+// this work only for root
+//    // test if it is connected?
+//    CSmallString cmd;
+//    cmd << "/usr/bin/lsof \"" << socket << "\" 2> /dev/null";
 
-    FILE* p_fin = popen(cmd,"r");
-    if( p_fin ){
-        if( pclose(p_fin) == 0 ) return(true);
-    }
+//    FILE* p_fin = popen(cmd,"r");
+//    if( p_fin ){
+//        if( pclose(p_fin) == 0 ) return(true);
+//    }
 
-    return(false);
+    return(true);
 }
 
 //==============================================================================
