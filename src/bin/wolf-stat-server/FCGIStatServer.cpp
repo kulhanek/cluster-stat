@@ -76,7 +76,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     MaxNodes = 100;
     RDSKPath = "/var/lib/websockify";
     DomainName  = "ncbr.muni.cz";
-    URLTmp          = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1%/%2%&resize=remote&autoconnect=true";
+    URLTmp          = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/%1%/%2%&autoconnect=true";
     PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
     StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\" \"%3%\"";
 }
