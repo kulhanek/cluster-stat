@@ -142,7 +142,7 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 // start VNC
     CSmallString cmd;
     stringstream str;
-    str << format(StartRDSKCMD)%krb5ccname%node;
+    str << format(StartRDSKCMD)%krb5ccname%ruser%node;
     cmd << str.str();
 
     cout << "> Start RDSK: " << ruser << "@" << node << endl;

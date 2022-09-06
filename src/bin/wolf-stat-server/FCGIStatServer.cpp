@@ -78,7 +78,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     DomainName  = "ncbr.muni.cz";
     URLTmp          = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1%/%2%&resize=remote&autoconnect=true";
     PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
-    StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\"";
+    StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%1%\" \"%2%\"";
 }
 
 //==============================================================================
