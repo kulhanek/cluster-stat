@@ -85,6 +85,7 @@ private:
     unsigned int        MaxNodes;
     CFileName           RDSKPath;
     CFileName           DomainName;
+    CSmallString        URLTmp;
 
     std::map<std::string,CCompNode> Nodes;
 
@@ -103,6 +104,8 @@ private:
 
     bool ProcessCommonParams(CFCGIRequest& request,
                              CTemplateParams& template_params);
+
+    bool IsSocketLive(const CSmallString& socket);
 
     // configuration options ---------------------------------------------------
     bool LoadConfig(void);

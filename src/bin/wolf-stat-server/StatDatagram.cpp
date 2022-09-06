@@ -305,26 +305,12 @@ bool CStatDatagram::IsValid(void)
 
 void CStatDatagram::PrintInfo(std::ostream& vout)
 {
-    vout << "Node  = " << GetShortNodeName() << endl;
+    vout << "Node  = " << GetNodeName() << endl;
     vout << "User  = " << GetLocalUserName() << endl;
     vout << "Login = " << GetLocalLoginName() << endl;
     vout << "#L    = " << NumOfLocalUsers << endl;
     vout << "#R    = " << NumOfRemoteUsers << endl;
     vout << "#VNC  = " << NumOfVNCRemoteUsers << endl;
-}
-
-//------------------------------------------------------------------------------
-
-CSmallString CStatDatagram::GetShortNodeName(void)
-{
-    NodeName[NAME_SIZE-1] = '\0';
-    CSmallString fqdn = NodeName;
-
-    std::string stext = std::string(fqdn);
-    vector<string>  words;
-    split(words,stext,is_any_of("."));
-    if( words.size() >= 1 ) return( words[0] );
-    return("");
 }
 
 //------------------------------------------------------------------------------

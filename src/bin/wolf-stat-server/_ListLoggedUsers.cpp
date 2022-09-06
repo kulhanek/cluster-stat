@@ -65,7 +65,7 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
-        request.OutStream.PutStr(dtg.GetShortNodeName()); // node name
+        request.OutStream.PutStr(dtg.GetNodeName()); // node name
         if( dtg.GetLocalLoginName() != NULL ){
             request.OutStream.PutChar(';');
             request.OutStream.PutStr(dtg.GetLocalUserName()); // full user name - optional

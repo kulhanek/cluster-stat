@@ -42,8 +42,7 @@ public:
     void SetShortNodeName(const CSmallString& name);
 
 // getters ---------------------------------------------------------------------
-    CSmallString GetShortNodeName(void);
-    CSmallString GetNodeName(void);
+    CSmallString GetNodeName(void);             // node name is always short
     CSmallString GetLocalUserName(void);
     CSmallString GetLocalLoginName(void);
     CSmallString GetLocalUserName(int id);

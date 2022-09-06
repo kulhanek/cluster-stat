@@ -74,8 +74,9 @@ CFCGIStatServer::CFCGIStatServer(void)
     FCGIPort = 32597;
     StatPort = 32598;
     MaxNodes = 100;
-    RDSKPath = "/var/www/html/bluezone/rdsk";
+    RDSKPath = "/var/lib/websockify";
     DomainName = "ncbr.muni.cz";
+    URLTmp   = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1/%2&resize=remote&autoconnect=true";
 }
 
 //==============================================================================
@@ -179,7 +180,7 @@ void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
 {
     NodesMutex.Lock();
 
-    string node = string(dtg.GetShortNodeName());
+    string node = string(dtg.GetNodeName());
 
     if( MaxNodes == Nodes.size() ){
         // too many nodes and the node is not registered yet
@@ -334,6 +335,7 @@ bool CFCGIStatServer::LoadConfig(void)
         p_ele->GetAttribute("maxnodes",MaxNodes);
         p_ele->GetAttribute("rdskpath",RDSKPath);
         p_ele->GetAttribute("domain",DomainName);
+        p_ele->GetAttribute("url",URLTmp);
     }
 
     vout << "#" << endl;
@@ -343,6 +345,7 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# Max nodes (maxnodes) = " << MaxNodes << endl;
     vout << "# RDSK Path (rdskpath) = " << RDSKPath << endl;
     vout << "# Domain name (domain) = " << DomainName << endl;
+    vout << "# URL Template (url)   = " << URLTmp << endl;
     vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");

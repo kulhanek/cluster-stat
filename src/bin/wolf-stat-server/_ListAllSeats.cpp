@@ -62,7 +62,7 @@ bool CFCGIStatServer::_ListAllSeats(CFCGIRequest& request)
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
-        request.OutStream.PutStr(dtg.GetShortNodeName()); // node name
+        request.OutStream.PutStr(dtg.GetNodeName()); // node name
 
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(CSmallString(dtg.NumOfLocalUsers));

@@ -32,8 +32,10 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/format.hpp>
 
 using namespace std;
 using namespace boost;
@@ -115,8 +117,6 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 {
     request.Params.PrintParams();
 
-    sleep(180);
-
     CSmallString ruser = request.Params.GetValue("REMOTE_USER");
 
 // start VNC
@@ -176,7 +176,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                 status = "poweron";
             } else {
                 status = "down";
-                Nodes[string(node.Basic.GetShortNodeName())].InPowerOnMode = false;
+                Nodes[string(node.Basic.GetNodeName())].InPowerOnMode = false;
             }
         }
 
@@ -185,7 +185,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( diff < 300 ){
                 status = "startvnc";
             } else {
-                Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
+                Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
             }
         }
 
@@ -200,7 +200,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         }
         if( occupy ){
             status = "occ";
-            Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
+            Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
         }
 
         CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
@@ -208,22 +208,25 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             socket = socket + "." + DomainName;
         }
         CSmallString rdsk_url = "";
-        if( CFileSystem::IsSocket(socket) ){
+        if( IsSocketLive(socket) ){
             status = "vnc";
-            rdsk_url << "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/";
-            rdsk_url << ruser << "/";
-            rdsk_url << node.Basic.GetNodeName();
+            stringstream str;
+            CSmallString rnode;
+            rnode << node.Basic.GetNodeName();
             if( DomainName != NULL ){
-                rdsk_url << "." << DomainName;
+                rnode << "." << DomainName;
             }
+            str << format(URLTmp)%ruser%rnode;
+            rdsk_url << str.str();
+
             rdsk_url << "&resize=remote&autoconnect=true";
-            Nodes[string(node.Basic.GetShortNodeName())].InStartVNCMode = false;
+            Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
         }
 
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
-        request.OutStream.PutStr(node.Basic.GetShortNodeName()); // node name
+        request.OutStream.PutStr(node.Basic.GetNodeName()); // node name
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(rdsk_url);
         request.OutStream.PutChar('\n');
@@ -237,6 +240,25 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
     request.FinishRequest();
 
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
+{
+    // is it socket?
+    if( CFileSystem::IsSocket(socket) == false ) return(false);
+
+    // test if it is connected?
+    CSmallString cmd;
+    cmd << "/usr/bin/lsof \"" << socket << "\" 2> /dev/null";
+
+    FILE* p_fin = popen(cmd,"r");
+    if( p_fin ){
+        if( pclose(p_fin) == 0 ) return(true);
+    }
+
+    return(false);
 }
 
 //==============================================================================

@@ -62,7 +62,7 @@ bool CFCGIStatServer::_Debug(CFCGIRequest& request)
         if( diff > 300 ){  // skew of 300 seconds
             status = "down";
         }      
-        str << "<h1>" << dtg.GetShortNodeName() << "</h1>" << endl;
+        str << "<h1>" << dtg.GetNodeName() << "</h1>" << endl;
         str << "<p>Status: " << status << "</p>" << endl;
         str << "<p>Number of local sessions : " << dtg.NumOfLocalUsers << "</p>" << endl;
         str << "<ol>" << endl;
