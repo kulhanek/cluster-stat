@@ -96,7 +96,6 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         CSmallString err;
         err << "unable to execute power on command '" << cmd << "'";
         ES_ERROR(cmd);
-    } else {
         // unable to run - do not mark the node
         return(_RemoteAccessList(request));
     }
@@ -153,7 +152,6 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
         CSmallString err;
         err << "unable to execute start rdks command '" << cmd << "'";
         ES_ERROR(cmd);
-    } else {
         // unable to run - do not mark the node
         return(_RemoteAccessList(request));
     }
