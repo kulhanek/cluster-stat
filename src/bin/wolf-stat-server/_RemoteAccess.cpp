@@ -221,7 +221,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         diff = ctime.GetSecondsFromBeginning() - node.PowerOnTime;
         if( node.InPowerOnMode ){
-            if( diff < 300 ){
+            if( diff < 180 ){
                 status = "poweron";
             } else {
                 status = "down";
@@ -231,7 +231,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         diff = ctime.GetSecondsFromBeginning() - node.StartVNCTime;
         if( node.InStartVNCMode ){
-            if( diff < 300 ){
+            if( diff < 60 ){
                 status = "startvnc";
             } else {
                 Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
