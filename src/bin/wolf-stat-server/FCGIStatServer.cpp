@@ -76,7 +76,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     MaxNodes = 100;
     RDSKPath = "/var/lib/websockify";
     DomainName = "ncbr.muni.cz";
-    URLTmp   = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1/%2&resize=remote&autoconnect=true";
+    URLTmp   = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1%/%2%&resize=remote&autoconnect=true";
 }
 
 //==============================================================================
