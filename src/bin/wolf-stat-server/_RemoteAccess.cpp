@@ -68,6 +68,9 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 {
     CSmallString ruser;
     ruser = request.Params.GetValue("REMOTE_USER");
+    if( ruser == NULL ){
+        ruser = "NoUser";
+    }
 
 // check if node is only name of the node
     for(int i=0; i < (int)node.GetLength(); i++){
@@ -82,10 +85,21 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 // call wolf-poweon script
     CSmallString cmd;
-    cmd = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"";
-    cmd << node << "\"";
+    stringstream str;
+    str << format(PowerOnCMD)%node;
+    cmd << str.str();
+
     cout << "> User: " << ruser << endl;
-    system(cmd);
+    int ret = system(cmd);
+
+    if( ret != 0 ){
+        CSmallString err;
+        err << "unable to execute power on command '" << cmd << "'";
+        ES_ERROR(cmd);
+    } else {
+        // unable to run - do not mark the node
+        return(_RemoteAccessList(request));
+    }
 
 // mark the node
     NodesMutex.Lock();
@@ -107,8 +121,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
     NodesMutex.Unlock();
 
 // send the node list
-    _RemoteAccessList(request);
-    return(true);
+    return(_RemoteAccessList(request));
 }
 
 //------------------------------------------------------------------------------
@@ -117,10 +130,33 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 {
     request.Params.PrintParams();
 
-    CSmallString ruser = request.Params.GetValue("REMOTE_USER");
+    CSmallString ruser      = request.Params.GetValue("REMOTE_USER");
+    if( ruser == NULL ){
+        ruser = "NoUser";
+    }
+
+    CSmallString krb5ccname = request.Params.GetValue("KRB5CCNAME");
+    if( krb5ccname == NULL ){
+        krb5ccname = "NONE";
+    }
 
 // start VNC
-    cout << "start VNC: " << ruser << "@" << node << endl;
+    CSmallString cmd;
+    stringstream str;
+    str << format(StartRDSKCMD)%krb5ccname%node;
+    cmd << str.str();
+
+    cout << "> Start RDSK: " << ruser << "@" << node << endl;
+    int ret = system(cmd);
+
+    if( ret != 0 ){
+        CSmallString err;
+        err << "unable to execute start rdks command '" << cmd << "'";
+        ES_ERROR(cmd);
+    } else {
+        // unable to run - do not mark the node
+        return(_RemoteAccessList(request));
+    }
 
     CSmallTimeAndDate ctime;
     ctime.GetActualTimeAndDate();
@@ -142,8 +178,7 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
     NodesMutex.Unlock();
 
 // send the node list
-    _RemoteAccessList(request);
-    return(true);
+    return(_RemoteAccessList(request));
 }
 
 //------------------------------------------------------------------------------

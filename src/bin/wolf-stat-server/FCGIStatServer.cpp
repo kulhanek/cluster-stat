@@ -75,8 +75,10 @@ CFCGIStatServer::CFCGIStatServer(void)
     StatPort = 32598;
     MaxNodes = 100;
     RDSKPath = "/var/lib/websockify";
-    DomainName = "ncbr.muni.cz";
-    URLTmp   = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1%/%2%&resize=remote&autoconnect=true";
+    DomainName  = "ncbr.muni.cz";
+    URLTmp          = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?host=wolf.ncbr.muni.cz&encrypt=1&path=/bluezone/rdsk/%1%/%2%&resize=remote&autoconnect=true";
+    PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
+    StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\"";
 }
 
 //==============================================================================
@@ -336,16 +338,21 @@ bool CFCGIStatServer::LoadConfig(void)
         p_ele->GetAttribute("rdskpath",RDSKPath);
         p_ele->GetAttribute("domain",DomainName);
         p_ele->GetAttribute("url",URLTmp);
+        p_ele->GetAttribute("poweron",PowerOnCMD);
+        p_ele->GetAttribute("rdsk",StartRDSKCMD);
     }
 
     vout << "#" << endl;
     vout << "# === [servers] ================================================================" << endl;
-    vout << "# FCGI Port (fcgiport) = " << FCGIPort << endl;
-    vout << "# Stat Port (statport) = " << StatPort << endl;
-    vout << "# Max nodes (maxnodes) = " << MaxNodes << endl;
-    vout << "# RDSK Path (rdskpath) = " << RDSKPath << endl;
-    vout << "# Domain name (domain) = " << DomainName << endl;
-    vout << "# URL Template (url)   = " << URLTmp << endl;
+    vout << "# FCGI Port (fcgiport)     = " << FCGIPort << endl;
+    vout << "# Stat Port (statport)     = " << StatPort << endl;
+    vout << "# Max nodes (maxnodes)     = " << MaxNodes << endl;
+    vout << "# RDSK Path (rdskpath)     = " << RDSKPath << endl;
+    vout << "# Domain name (domain)     = " << DomainName << endl;
+    vout << "# URL Template (url)       = " << URLTmp << endl;
+    vout << "# PowerOn CMD (poweron)    = " << PowerOnCMD << endl;
+    vout << "# Start RDSK (rdsk)        = " << StartRDSKCMD << endl;
+
     vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");

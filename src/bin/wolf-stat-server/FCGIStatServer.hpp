@@ -86,6 +86,8 @@ private:
     CFileName           RDSKPath;
     CFileName           DomainName;
     CSmallString        URLTmp;
+    CSmallString        PowerOnCMD;
+    CSmallString        StartRDSKCMD;
 
     std::map<std::string,CCompNode> Nodes;
 
