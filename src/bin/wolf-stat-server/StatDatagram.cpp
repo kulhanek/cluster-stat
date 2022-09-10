@@ -184,7 +184,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
             pclose(p_sf);
         }
 
-        if( (remote == false) && (x11 == true) && (wayland == true) ){
+        if( (remote == false) && ((x11 == true) || (wayland == true)) ){
             if( NumOfLocalUsers < MAX_TTYS ){
                 strncpy(LocalUserName[NumOfLocalUsers],ses.UserName,NAME_SIZE-1);
                 strncpy(LocalLoginName[NumOfLocalUsers],ses.LoginName,NAME_SIZE-1);
