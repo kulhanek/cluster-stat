@@ -302,18 +302,19 @@ bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
     // is it socket?
     if( CFileSystem::IsSocket(socket) == false ) return(false);
 
-// FIXME
-// this work only for root
-//    // test if it is connected?
-//    CSmallString cmd;
-//    cmd << "/usr/bin/lsof \"" << socket << "\" 2> /dev/null";
+    bool isactive = false;
+    CSmallString cmd;
+    cmd << "/usr/bin/cat /proc/net/unix";
+    FILE* p_sf = popen(cmd,"r");
+    if( p_sf ){
+        CSmallString buffer;
+        while( buffer.ReadLineFromFile(p_sf,true,true) ){
+            if( buffer.FindSubString(socket) != -1 ) isactive = true;
+        }
+        pclose(p_sf);
+    }
 
-//    FILE* p_fin = popen(cmd,"r");
-//    if( p_fin ){
-//        if( pclose(p_fin) == 0 ) return(true);
-//    }
-
-    return(true);
+    return(isactive);
 }
 
 //==============================================================================
