@@ -253,7 +253,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
         CheckSum += (unsigned char)ActiveLocalLoginName[i];
     }
 
-    CheckSum += ActiveLocalLoginType;
+    CheckSum += (unsigned char)ActiveLocalLoginType;
 
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
@@ -309,7 +309,7 @@ bool CStatDatagram::IsValid(void)
         checksum += (unsigned char)ActiveLocalLoginName[i];
     }
 
-    checksum += ActiveLocalLoginType;
+    checksum += (unsigned char)ActiveLocalLoginType;
 
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
@@ -324,7 +324,7 @@ bool CStatDatagram::IsValid(void)
 
     checksum += NumOfLocalUsers;
     checksum += NumOfRemoteUsers;
-    CheckSum += NumOfRDSKRemoteUsers;
+    checksum += NumOfRDSKRemoteUsers;
     checksum += NumOfVNCRemoteUsers;
     checksum += PowerDown;
     checksum += TimeStamp;
