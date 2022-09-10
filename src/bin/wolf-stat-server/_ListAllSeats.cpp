@@ -80,7 +80,11 @@ bool CFCGIStatServer::_ListAllSeats(CFCGIRequest& request)
             request.OutStream.PutStr(dtg.GetLocalUserName(i));
             request.OutStream.PutStr(" (");
             request.OutStream.PutStr(dtg.GetLocalLoginName(i));
-            request.OutStream.PutStr(") [X11]");
+            if( dtg.GetLocalLoginType(i) == 'W' ){
+                request.OutStream.PutStr(") [Wayland]");
+            } else {
+                request.OutStream.PutStr(") [X11]");
+            }
             delimit = true;
         }
         for(int i=0; i < dtg.NumOfRemoteUsers; i++){
@@ -88,7 +92,9 @@ bool CFCGIStatServer::_ListAllSeats(CFCGIRequest& request)
             request.OutStream.PutStr(dtg.GetRemoteUserName(i));
             request.OutStream.PutStr(" (");
             request.OutStream.PutStr(dtg.GetRemoteLoginName(i));
-            if( dtg.GetRemoteLoginType(i) == 'V' ){
+            if( dtg.GetRemoteLoginType(i) == 'T' ){
+                request.OutStream.PutStr(") [RDSK]");
+            } else if( dtg.GetRemoteLoginType(i) == 'V' ){
                 request.OutStream.PutStr(") [VNC]");
             } else {
                 request.OutStream.PutStr(") [ssh]");

@@ -119,7 +119,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         Nodes[string(node)].PowerOnTime = ctime.GetSecondsFromBeginning();
     } else {
         CCompNode data;
-        data.Basic.SetShortNodeName(node);
+        data.Basic.SetNodeName(node);
         data.InPowerOnMode = true;
         data.PowerOnTime  = ctime.GetSecondsFromBeginning();
         Nodes[string(node)] = data;
@@ -183,7 +183,7 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
         Nodes[string(node)].StartVNCTime   = ctime.GetSecondsFromBeginning();
     } else {
         CCompNode data;
-        data.Basic.SetShortNodeName(node);
+        data.Basic.SetNodeName(node);
         data.InStartVNCMode = true;
         data.StartVNCTime   = ctime.GetSecondsFromBeginning();
         Nodes[string(node)] = data;

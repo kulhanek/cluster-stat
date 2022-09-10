@@ -51,13 +51,16 @@ CStatDatagram::CStatDatagram(void)
     memset(NodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(LocalLoginType,0,MAX_TTYS);
     memset(ActiveLocalUserName,0,NAME_SIZE);
     memset(ActiveLocalLoginName,0,NAME_SIZE);
+    ActiveLocalLoginType = ' ';
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
-    memset(RemoteLoginType,0,MAX_TTYS);
+    memset(RemoteLoginType,' ',MAX_TTYS);
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
+    NumOfRDSKRemoteUsers = 0;
     NumOfVNCRemoteUsers = 0;
     TimeStamp = 0;
     PowerDown = 0;
@@ -72,14 +75,17 @@ void CStatDatagram::SetDatagram(bool powerdown)
     memset(NodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(LocalLoginType,0,MAX_TTYS);
     memset(ActiveLocalUserName,0,NAME_SIZE);
     memset(ActiveLocalLoginName,0,NAME_SIZE);
+    ActiveLocalLoginType = ' ';
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
-    memset(RemoteLoginType,0,MAX_TTYS);
+    memset(RemoteLoginType,' ',MAX_TTYS);
 
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
+    NumOfRDSKRemoteUsers = 0;
     NumOfVNCRemoteUsers = 0;
 
     TimeStamp = 0;
@@ -146,8 +152,10 @@ void CStatDatagram::SetDatagram(bool powerdown)
         CSmallString cmd;
         bool remote = false;
         bool x11 = false;
+        bool wayland = false;
         bool loctty = false;
         bool vnc = false;
+        bool rdsk = false;
 
         cmd << "/bin/loginctl show-session " << ses.SessionID;
         FILE* p_sf = popen(cmd,"r");
@@ -156,6 +164,8 @@ void CStatDatagram::SetDatagram(bool powerdown)
             CSmallString buffer;
             while( buffer.ReadLineFromFile(p_sf,true,true) ){
                 if( buffer.FindSubString("Type=x11") != -1 ) x11 = true;
+                if( buffer.FindSubString("Type=wayland") != -1 ) wayland = true;
+                if( buffer.FindSubString("Service=tigervnc") != -1 ) rdsk = true;
                 if( buffer.FindSubString("Remote=yes") != -1 ) remote = true;
                 if( buffer.FindSubString(active_tty) != -1 ) loctty = true;
             }
@@ -174,28 +184,37 @@ void CStatDatagram::SetDatagram(bool powerdown)
             pclose(p_sf);
         }
 
-        if( (remote == false) && (x11 == true) ){
+        if( (remote == false) && (x11 == true) && (wayland == true) ){
             if( NumOfLocalUsers < MAX_TTYS ){
                 strncpy(LocalUserName[NumOfLocalUsers],ses.UserName,NAME_SIZE-1);
                 strncpy(LocalLoginName[NumOfLocalUsers],ses.LoginName,NAME_SIZE-1);
+                if( wayland == true ){
+                    LocalLoginType[NumOfRemoteUsers] = 'W';
+                } else {
+                    LocalLoginType[NumOfRemoteUsers] = 'X';
+                }
+                if( loctty ){
+                    ActiveLocalLoginType = LocalLoginType[NumOfRemoteUsers];
+                    strncpy(ActiveLocalUserName,ses.UserName,NAME_SIZE-1);
+                    strncpy(ActiveLocalLoginName,ses.LoginName,NAME_SIZE-1);
+                }
                 NumOfLocalUsers++;
-            }
-            if( loctty ){
-                strncpy(ActiveLocalUserName,ses.UserName,NAME_SIZE-1);
-                strncpy(ActiveLocalLoginName,ses.LoginName,NAME_SIZE-1);
             }
         }
         if( remote == true ){
             if( NumOfRemoteUsers < MAX_TTYS ){
                 strncpy(RemoteUserName[NumOfRemoteUsers],ses.UserName,NAME_SIZE-1);
                 strncpy(RemoteLoginName[NumOfRemoteUsers],ses.LoginName,NAME_SIZE-1);
-                if( vnc == true ){
+                if( rdsk == true ){
+                    RemoteLoginType[NumOfRemoteUsers] = 'T';
+                } else if( vnc == true ){
                     RemoteLoginType[NumOfRemoteUsers] = 'V';
                 } else {
                     RemoteLoginType[NumOfRemoteUsers] = 'R';
                 }
                 NumOfRemoteUsers++;
-                if( vnc == true ) NumOfVNCRemoteUsers++;
+                if( rdsk == true ) NumOfRDSKRemoteUsers++;
+                if( vnc == true )  NumOfVNCRemoteUsers++;
             }
         }
 
@@ -225,12 +244,18 @@ void CStatDatagram::SetDatagram(bool powerdown)
             CheckSum += (unsigned char)LocalLoginName[k][i];
         }
     }
+    for(size_t i=0; i < MAX_TTYS; i++){
+        CheckSum += (unsigned char)LocalLoginType[i];
+    }
     for(size_t i=0; i < NAME_SIZE; i++){
         CheckSum += (unsigned char)ActiveLocalUserName[i];
     }
     for(size_t i=0; i < NAME_SIZE; i++){
         CheckSum += (unsigned char)ActiveLocalLoginName[i];
     }
+
+    CheckSum += ActiveLocalLoginType;
+
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
             CheckSum += (unsigned char)RemoteUserName[k][i];
@@ -243,6 +268,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
 
     CheckSum += NumOfLocalUsers;
     CheckSum += NumOfRemoteUsers;
+    CheckSum += NumOfRDSKRemoteUsers;
     CheckSum += NumOfVNCRemoteUsers;
     CheckSum += PowerDown;
     CheckSum += TimeStamp;
@@ -250,7 +276,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
 
 //------------------------------------------------------------------------------
 
-void CStatDatagram::SetShortNodeName(const CSmallString& name)
+void CStatDatagram::SetNodeName(const CSmallString& name)
 {
     strncpy(NodeName,name,NAME_SIZE-1);
 }
@@ -274,12 +300,17 @@ bool CStatDatagram::IsValid(void)
             checksum += (unsigned char)LocalLoginName[k][i];
         }
     }
+    for(size_t i=0; i < MAX_TTYS; i++){
+        checksum += (unsigned char)LocalLoginType[i];
+    }
     for(size_t i=0; i < NAME_SIZE; i++){
         checksum += (unsigned char)ActiveLocalUserName[i];
     }
     for(size_t i=0; i < NAME_SIZE; i++){
         checksum += (unsigned char)ActiveLocalLoginName[i];
     }
+
+    checksum += ActiveLocalLoginType;
 
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
@@ -294,6 +325,7 @@ bool CStatDatagram::IsValid(void)
 
     checksum += NumOfLocalUsers;
     checksum += NumOfRemoteUsers;
+    CheckSum += NumOfRDSKRemoteUsers;
     checksum += NumOfVNCRemoteUsers;
     checksum += PowerDown;
     checksum += TimeStamp;
@@ -310,6 +342,7 @@ void CStatDatagram::PrintInfo(std::ostream& vout)
     vout << "Login = " << GetLocalLoginName() << endl;
     vout << "#L    = " << NumOfLocalUsers << endl;
     vout << "#R    = " << NumOfRemoteUsers << endl;
+    vout << "#RDSK = " << NumOfRDSKRemoteUsers << endl;
     vout << "#VNC  = " << NumOfVNCRemoteUsers << endl;
 }
 
@@ -337,6 +370,13 @@ CSmallString CStatDatagram::GetLocalLoginName(void)
 
 //------------------------------------------------------------------------------
 
+char CStatDatagram::GetLocalLoginType(void)
+{
+    return(ActiveLocalLoginType);
+}
+
+//------------------------------------------------------------------------------
+
 CSmallString CStatDatagram::GetLocalUserName(int id)
 {
     if( (id >= 0) && (id < MAX_TTYS) ){
@@ -355,6 +395,16 @@ CSmallString CStatDatagram::GetLocalLoginName(int id)
         return(LocalLoginName[id]);
     }
     return("");
+}
+
+//------------------------------------------------------------------------------
+
+char CStatDatagram::GetLocalLoginType(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        return(LocalLoginType[id]);
+    }
+    return(' ');
 }
 
 //------------------------------------------------------------------------------

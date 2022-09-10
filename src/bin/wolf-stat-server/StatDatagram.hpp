@@ -39,17 +39,23 @@ public:
 
 // setters ---------------------------------------------------------------------
     void SetDatagram(bool powerdown=false);
-    void SetShortNodeName(const CSmallString& name);
+    void SetNodeName(const CSmallString& name);
 
 // getters ---------------------------------------------------------------------
     CSmallString GetNodeName(void);             // node name is always short
+
     CSmallString GetLocalUserName(void);
     CSmallString GetLocalLoginName(void);
+    char         GetLocalLoginType(void);
+
     CSmallString GetLocalUserName(int id);
     CSmallString GetLocalLoginName(int id);
+    char         GetLocalLoginType(int id);
+
     CSmallString GetRemoteUserName(int id);
     CSmallString GetRemoteLoginName(int id);
     char         GetRemoteLoginType(int id);
+
     int          GetTimeStamp(void);
     bool         IsDown(void);
     void         PrintInfo(std::ostream& vout);
@@ -63,11 +69,16 @@ private:
     int     NumOfLocalUsers;
     char    LocalUserName[MAX_TTYS][NAME_SIZE];
     char    LocalLoginName[MAX_TTYS][NAME_SIZE];
+    char    LocalLoginType[MAX_TTYS];
+
     char    ActiveLocalUserName[NAME_SIZE];
     char    ActiveLocalLoginName[NAME_SIZE];
+    char    ActiveLocalLoginType;
+
     // remote users
     int     NumOfRemoteUsers;
-    int     NumOfVNCRemoteUsers; // subgroup of NumOfRemoteUsers
+    int     NumOfVNCRemoteUsers;    // subgroup of NumOfRemoteUsers
+    int     NumOfRDSKRemoteUsers;   // subgroup of NumOfRemoteUsers
     char    RemoteUserName[MAX_TTYS][NAME_SIZE];
     char    RemoteLoginName[MAX_TTYS][NAME_SIZE];
     char    RemoteLoginType[MAX_TTYS];
