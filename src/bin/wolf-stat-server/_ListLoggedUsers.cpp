@@ -71,8 +71,6 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
             request.OutStream.PutStr(dtg.GetLocalUserName()); // full user name - optional
             request.OutStream.PutChar(';');
             request.OutStream.PutStr(dtg.GetLocalLoginName()); // login name - optional
-            request.OutStream.PutChar(';');
-            request.OutStream.PutStr(dtg.GetLocalLoginType()); // login type - W (wayland), X (X11)
         }
         request.OutStream.PutChar('\n');
 

@@ -160,7 +160,6 @@ void CStatDatagram::SetDatagram(bool powerdown)
         cmd << "/bin/loginctl show-session " << ses.SessionID;
         FILE* p_sf = popen(cmd,"r");
         if( p_sf ){
-
             CSmallString buffer;
             while( buffer.ReadLineFromFile(p_sf,true,true) ){
                 if( buffer.FindSubString("Type=x11") != -1 ) x11 = true;
