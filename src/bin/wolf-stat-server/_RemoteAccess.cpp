@@ -228,6 +228,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
+        CSmallString rdsk_url = "";
         if( status != "down" ) {
             diff = ctime.GetSecondsFromBeginning() - node.StartVNCTime;
             if( node.InStartVNCMode ){
@@ -259,7 +260,6 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( DomainName != NULL ){
                 socket = socket + "." + DomainName;
             }
-            CSmallString rdsk_url = "";
             if( IsSocketLive(socket) ){
                 status = "vnc";
                 stringstream str;
