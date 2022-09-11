@@ -243,6 +243,9 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             occupy = true;
         }
         for(int i=0; i < node.Basic.NumOfRemoteUsers; i++){
+            if( node.Basic.GetRemoteLoginType(i) == 'R' ){
+                occupy = true;
+            }
             if( node.Basic.GetRemoteLoginType(i) == 'V' ){
                 occupy = true;
             }

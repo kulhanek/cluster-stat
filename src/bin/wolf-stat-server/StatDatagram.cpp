@@ -205,11 +205,11 @@ void CStatDatagram::SetDatagram(bool powerdown)
                 strncpy(RemoteUserName[NumOfRemoteUsers],ses.UserName,NAME_SIZE-1);
                 strncpy(RemoteLoginName[NumOfRemoteUsers],ses.LoginName,NAME_SIZE-1);
                 if( rdsk == true ){
-                    RemoteLoginType[NumOfRemoteUsers] = 'T';
+                    RemoteLoginType[NumOfRemoteUsers] = 'R';
                 } else if( vnc == true ){
                     RemoteLoginType[NumOfRemoteUsers] = 'V';
                 } else {
-                    RemoteLoginType[NumOfRemoteUsers] = 'R';
+                    RemoteLoginType[NumOfRemoteUsers] = 'S';
                 }
                 NumOfRemoteUsers++;
                 if( rdsk == true ) NumOfRDSKRemoteUsers++;

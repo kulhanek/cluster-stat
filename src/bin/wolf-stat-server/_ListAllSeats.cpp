@@ -92,7 +92,7 @@ bool CFCGIStatServer::_ListAllSeats(CFCGIRequest& request)
             request.OutStream.PutStr(dtg.GetRemoteUserName(i));
             request.OutStream.PutStr(" (");
             request.OutStream.PutStr(dtg.GetRemoteLoginName(i));
-            if( dtg.GetRemoteLoginType(i) == 'T' ){
+            if( dtg.GetRemoteLoginType(i) == 'R' ){
                 request.OutStream.PutStr(") [RDSK]");
             } else if( dtg.GetRemoteLoginType(i) == 'V' ){
                 request.OutStream.PutStr(") [VNC]");
