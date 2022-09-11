@@ -218,7 +218,6 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         if(  (diff > 180) || node.Basic.IsDown() ){  // skew of 180 seconds
             status = "down";
         }
-
         diff = ctime.GetSecondsFromBeginning() - node.PowerOnTime;
         if( node.InPowerOnMode ){
             if( diff < 180 ){
@@ -229,54 +228,56 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
-        diff = ctime.GetSecondsFromBeginning() - node.StartVNCTime;
-        if( node.InStartVNCMode ){
-            if( diff < 60 ){
-                status = "startvnc";
-            } else {
+        if( status != "down" ) {
+            diff = ctime.GetSecondsFromBeginning() - node.StartVNCTime;
+            if( node.InStartVNCMode ){
+                if( diff < 60 ){
+                    status = "startvnc";
+                } else {
+                    Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
+                }
+            }
+
+            bool occupy = false;
+            if( node.Basic.NumOfLocalUsers > 0 ){
+                occupy = true;
+            }
+            for(int i=0; i < node.Basic.NumOfRemoteUsers; i++){
+                if( node.Basic.GetRemoteLoginType(i) == 'R' ){
+                    occupy = true;
+                }
+                if( node.Basic.GetRemoteLoginType(i) == 'V' ){
+                    occupy = true;
+                }
+            }
+            if( occupy ){
+                status = "occ";
                 Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
             }
-        }
 
-        bool occupy = false;
-        if( node.Basic.NumOfLocalUsers > 0 ){
-            occupy = true;
-        }
-        for(int i=0; i < node.Basic.NumOfRemoteUsers; i++){
-            if( node.Basic.GetRemoteLoginType(i) == 'R' ){
-                occupy = true;
-            }
-            if( node.Basic.GetRemoteLoginType(i) == 'V' ){
-                occupy = true;
-            }
-        }
-        if( occupy ){
-            status = "occ";
-            Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
-        }
-
-        CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
-        if( DomainName != NULL ){
-            socket = socket + "." + DomainName;
-        }
-        CSmallString rdsk_url = "";
-        if( IsSocketLive(socket) ){
-            status = "vnc";
-            stringstream str;
-            CSmallString rnode;
-            rnode << node.Basic.GetNodeName();
+            CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
             if( DomainName != NULL ){
-                rnode << "." << DomainName;
+                socket = socket + "." + DomainName;
             }
-            try{
-                str << format(URLTmp)%ruser%rnode;
-            } catch(...) {
-                ES_ERROR("wrong url tmp");
+            CSmallString rdsk_url = "";
+            if( IsSocketLive(socket) ){
+                status = "vnc";
+                stringstream str;
+                CSmallString rnode;
+                rnode << node.Basic.GetNodeName();
+                if( DomainName != NULL ){
+                    rnode << "." << DomainName;
+                }
+                try{
+                    str << format(URLTmp)%ruser%rnode;
+                } catch(...) {
+                    ES_ERROR("wrong url tmp");
+                }
+
+                rdsk_url << str.str();
+
+                Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
             }
-
-            rdsk_url << str.str();
-
-            Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
         }
 
         // write response
