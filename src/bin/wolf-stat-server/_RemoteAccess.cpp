@@ -148,7 +148,7 @@ bool CFCGIStatServer::CanPowerUp(const CSmallString& node)
     }
 
     // up
-    // maintanance
+    // maintenance
     // unknown
     return(true);
 }
@@ -243,7 +243,7 @@ bool CFCGIStatServer::CanStartRDSK(const CSmallString& node)
     }
 
     // down
-    // maintanance
+    // maintenance
     // unknown
     return(true);
 }
@@ -271,14 +271,14 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         // node status
         EPowerStat nstat = GetNodePowerStat(node->Basic.GetNodeName());
         if( nstat == EPS_MAINTANANCE ){
-            status = "maintanance";
+            status = "maintenance";
             int diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
             if( diff > 180 ){  // skew of 180 seconds
                 node->Clear();
             }
         }
 
-        if( status != "maintanance" ){
+        if( status != "maintenance" ){
             // check timestamp from user stat file
             int diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
             if(  (diff > 180) || node->Basic.IsDown() || nstat == EPS_DOWN ){  // skew of 180 seconds
@@ -297,7 +297,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
-        if( (status != "poweron") && (status != "down") && (status != "maintanance") ) {
+        if( (status != "poweron") && (status != "down") && (status != "maintenance") ) {
             int diff = ctime.GetSecondsFromBeginning() - node->StartVNCTime;
             if( node->InStartVNCMode ){
                 if( diff < 60 ){
@@ -432,7 +432,7 @@ EPowerStat CFCGIStatServer::GetNodePowerStat(const CSmallString& node)
     if( p_sf ){
         CSmallString buffer;
         while( buffer.ReadLineFromFile(p_sf,true,true) ){
-            if( buffer.FindSubString("resources_available.power_status = maintanance") != -1 ) status = EPS_MAINTANANCE;
+            if( buffer.FindSubString("resources_available.power_status = maintenance") != -1 ) status = EPS_MAINTANANCE;
             if( buffer.FindSubString("resources_available.power_status = up") != -1 ) status = EPS_UP;
             if( buffer.FindSubString("resources_available.power_status = down") != -1 ) status = EPS_DOWN;
         }
