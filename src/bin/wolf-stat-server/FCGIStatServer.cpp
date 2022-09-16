@@ -63,6 +63,23 @@ CCompNode::CCompNode(void)
 
     InStartVNCMode = false;
     StartVNCTime = 0;
+
+    Basic.Clear();
+}
+
+//------------------------------------------------------------------------------
+
+void CCompNode::Clear(void)
+{
+    InPowerOnMode = false;
+    PowerOnTime = 0;
+
+    InStartVNCMode = false;
+    StartVNCTime = 0;
+
+    CSmallString node = Basic.GetNodeName();
+    Basic.Clear();
+    Basic.SetNodeName(node);
 }
 
 //==============================================================================
@@ -79,6 +96,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     URLTmp          = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/%1%/%2%&autoconnect=true";
     PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
     StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\" \"%3%\"";
+    GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes  pbsnodes -v %1%";
 }
 
 //==============================================================================
@@ -195,18 +213,18 @@ void CFCGIStatServer::RegisterNode(CStatDatagram& dtg)
 
     if( Nodes.count(node) == 1 ) {
         // the node is registered
-        Nodes[node].Basic = dtg;
+        Nodes[node]->Basic = dtg;
 
         // clear power on status
-        Nodes[node].InPowerOnMode  = false;
-        Nodes[node].PowerOnTime    = 0;
+        Nodes[node]->InPowerOnMode  = false;
+        Nodes[node]->PowerOnTime    = 0;
 
     } else {
         // new registration
-        CCompNode data;
-        data.Basic          = dtg;
-        data.InPowerOnMode  = false;
-        data.PowerOnTime    = 0;
+        CCompNodePtr data(new CCompNode);
+        data->Basic          = dtg;
+        data->InPowerOnMode  = false;
+        data->PowerOnTime    = 0;
 
         Nodes[node] = data;
     }

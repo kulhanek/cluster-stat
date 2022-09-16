@@ -83,7 +83,12 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         }
     }
 
-// call wolf-poweon script
+// final check
+    if( CanPowerUp(node) == false ){
+        return(_RemoteAccessList(request));
+    }
+
+// call wolf-poweron script
     CSmallString cmd;
     stringstream str;
     try {
@@ -115,13 +120,13 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
     ctime.GetActualTimeAndDate();
 
     if( Nodes.count(string(node)) == 1 ){
-        Nodes[string(node)].InPowerOnMode = true;
-        Nodes[string(node)].PowerOnTime = ctime.GetSecondsFromBeginning();
+        Nodes[string(node)]->InPowerOnMode = true;
+        Nodes[string(node)]->PowerOnTime = ctime.GetSecondsFromBeginning();
     } else {
-        CCompNode data;
-        data.Basic.SetNodeName(node);
-        data.InPowerOnMode = true;
-        data.PowerOnTime  = ctime.GetSecondsFromBeginning();
+        CCompNodePtr data(new CCompNode);
+        data->Basic.SetNodeName(node);
+        data->InPowerOnMode = true;
+        data->PowerOnTime  = ctime.GetSecondsFromBeginning();
         Nodes[string(node)] = data;
     }
 
@@ -133,10 +138,25 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 //------------------------------------------------------------------------------
 
+bool CFCGIStatServer::CanPowerUp(const CSmallString& node)
+{
+    EPowerStat status = GetNodePowerStat(node);
+
+    if( status == EPS_DOWN ){
+        // we can turn on the node, which is down
+        return(true);
+    }
+
+    // up
+    // maintanance
+    // unknown
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
 bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallString& node)
 {
-//   request.Params.PrintParams();
-
     CSmallString ruser      = request.Params.GetValue("REMOTE_USER");
     if( ruser == NULL ){
         ruser = "NoUser";
@@ -147,7 +167,23 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
         krb5ccname = "NONE";
     }
 
-// start VNC
+// check if node is only name of the node
+    for(int i=0; i < (int)node.GetLength(); i++){
+        if( isalnum(node[i]) == 0 ) {
+            CSmallString error;
+            error << "illegal node name (" << node << ") from USER (" << ruser << ")";
+            ES_ERROR(error);
+            request.FinishRequest();
+            return(false);
+        }
+    }
+
+// final check
+    if( CanStartRDSK(node) == false ){
+        return(_RemoteAccessList(request));
+    }
+
+// start RDSK
     CSmallString cmd;
     stringstream str;
     try{
@@ -155,7 +191,7 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
         cmd << str.str();
     } catch (...) {
         CSmallString err;
-        err << "unalble to format startrdsk command '" << StartRDSKCMD << "'";
+        err << "unable to format startrdsk command '" << StartRDSKCMD << "'";
         ES_ERROR(err);
         cmd = NULL;
         cmd << "/bin/false";
@@ -179,13 +215,13 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
     NodesMutex.Lock();
 
     if( Nodes.count(string(node)) == 1 ){
-        Nodes[string(node)].InStartVNCMode = true;
-        Nodes[string(node)].StartVNCTime   = ctime.GetSecondsFromBeginning();
+        Nodes[string(node)]->InStartVNCMode = true;
+        Nodes[string(node)]->StartVNCTime   = ctime.GetSecondsFromBeginning();
     } else {
-        CCompNode data;
-        data.Basic.SetNodeName(node);
-        data.InStartVNCMode = true;
-        data.StartVNCTime   = ctime.GetSecondsFromBeginning();
+        CCompNodePtr data(new CCompNode);
+        data->Basic.SetNodeName(node);
+        data->InStartVNCMode = true;
+        data->StartVNCTime   = ctime.GetSecondsFromBeginning();
         Nodes[string(node)] = data;
     }
 
@@ -197,66 +233,94 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 
 //------------------------------------------------------------------------------
 
+bool CFCGIStatServer::CanStartRDSK(const CSmallString& node)
+{
+    EPowerStat status = GetNodePowerStat(node);
+
+    if( status == EPS_UP ){
+        // we start RDSK on node, which is UP
+        return(true);
+    }
+
+    // down
+    // maintanance
+    // unknown
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
 bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 {
     CSmallString ruser = request.Params.GetValue("REMOTE_USER");
 
     NodesMutex.Lock();
 
-    std::map<std::string,CCompNode>::iterator it = Nodes.begin();
-    std::map<std::string,CCompNode>::iterator ie = Nodes.end();
+    std::map<std::string,CCompNodePtr>::iterator it = Nodes.begin();
+    std::map<std::string,CCompNodePtr>::iterator ie = Nodes.end();
+
+    CSmallTimeAndDate ctime;
+    ctime.GetActualTimeAndDate();
 
     while( it != ie ){
-        CCompNode node = it->second;
+        CCompNodePtr node = it->second;
 
-        // check node status
         CSmallString status = "up";
-        // check timestamp from user stat file
-        CSmallTimeAndDate ctime;
-        ctime.GetActualTimeAndDate();
-        int diff = ctime.GetSecondsFromBeginning() - node.Basic.GetTimeStamp();
-        if(  (diff > 180) || node.Basic.IsDown() ){  // skew of 180 seconds
-            status = "down";
-        }
-        diff = ctime.GetSecondsFromBeginning() - node.PowerOnTime;
-        if( node.InPowerOnMode ){
-            if( diff < 180 ){
-                status = "poweron";
-            } else {
-                status = "down";
-                Nodes[string(node.Basic.GetNodeName())].InPowerOnMode = false;
+        CSmallString rdsk_url = "";
+
+        // node status
+        EPowerStat nstat = GetNodePowerStat(node->Basic.GetNodeName());
+        if( nstat == EPS_MAINTANANCE ){
+            status = "maintanance";
+            int diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
+            if( diff > 180 ){  // skew of 180 seconds
+                node->Clear();
             }
         }
 
-        CSmallString rdsk_url = "";
-        if( status != "down" ) {
-            diff = ctime.GetSecondsFromBeginning() - node.StartVNCTime;
-            if( node.InStartVNCMode ){
+        if( status != "maintanance" ){
+            // check timestamp from user stat file
+            int diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
+            if(  (diff > 180) || node->Basic.IsDown() || nstat == EPS_DOWN ){  // skew of 180 seconds
+                status = "down";
+                node->Clear();
+            }
+            diff = ctime.GetSecondsFromBeginning() - node->PowerOnTime;
+            if( node->InPowerOnMode ){
+                if( diff < 180 ){
+                    status = "poweron";
+                } else {
+                    status = "down";
+                    node->InPowerOnMode = false;
+                    node->Clear();
+                }
+            }
+        }
+
+        if( (status != "poweron") && (status != "down") && (status != "maintanance") ) {
+            int diff = ctime.GetSecondsFromBeginning() - node->StartVNCTime;
+            if( node->InStartVNCMode ){
                 if( diff < 60 ){
                     status = "startvnc";
                 } else {
-                    Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
+                    node->InStartVNCMode = false;
                 }
             }
 
             bool occupy = false;
-            if( node.Basic.NumOfLocalUsers > 0 ){
+            if( node->Basic.NumOfLocalUsers > 0 ){
                 occupy = true;
             }
-            for(int i=0; i < node.Basic.NumOfRemoteUsers; i++){
-                if( node.Basic.GetRemoteLoginType(i) == 'R' ){
+            for(int i=0; i < node->Basic.NumOfRemoteUsers; i++){
+                if( node->Basic.GetRemoteLoginType(i) == 'R' ){
                     occupy = true;
                 }
-                if( node.Basic.GetRemoteLoginType(i) == 'V' ){
+                if( node->Basic.GetRemoteLoginType(i) == 'V' ){
                     occupy = true;
                 }
-            }
-            if( occupy ){
-                status = "occ";
-                Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
             }
 
-            CFileName socket = RDSKPath / ruser / node.Basic.GetNodeName();
+            CFileName socket = RDSKPath / ruser / node->Basic.GetNodeName();
             if( DomainName != NULL ){
                 socket = socket + "." + DomainName;
             }
@@ -264,7 +328,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                 status = "vnc";
                 stringstream str;
                 CSmallString rnode;
-                rnode << node.Basic.GetNodeName();
+                rnode << node->Basic.GetNodeName();
                 if( DomainName != NULL ){
                     rnode << "." << DomainName;
                 }
@@ -276,14 +340,18 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
                 rdsk_url << str.str();
 
-                Nodes[string(node.Basic.GetNodeName())].InStartVNCMode = false;
+                node->InStartVNCMode = false;
+            }
+
+            if( occupy && (status != "startvnc") && (status != "vnc") ){
+                status = "occ";
             }
         }
 
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
-        request.OutStream.PutStr(node.Basic.GetNodeName()); // node name
+        request.OutStream.PutStr(node->Basic.GetNodeName()); // node name
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(rdsk_url);
         request.OutStream.PutChar('\n');
@@ -319,6 +387,46 @@ bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
     }
 
     return(isactive);
+}
+
+//------------------------------------------------------------------------------
+
+EPowerStat CFCGIStatServer::GetNodePowerStat(const CSmallString& node)
+{
+    EPowerStat status = EPS_UNKNOWN;
+
+    CSmallString cmd;
+    stringstream str;
+    try{
+        str << format(GetNodeStatCMD)%node;
+        cmd << str.str();
+    } catch (...) {
+        CSmallString err;
+        err << "unable to format get node stat command '" << GetNodeStatCMD << "'";
+        ES_ERROR(err);
+        cmd = NULL;
+        cmd << "/bin/false";
+    }
+
+    cout << "> Get node stat: " << node << endl;
+
+    FILE* p_sf = popen(cmd,"r");
+    if( p_sf ){
+        CSmallString buffer;
+        while( buffer.ReadLineFromFile(p_sf,true,true) ){
+            if( buffer.FindSubString("resources_available.power_status = maintanance") != -1 ) status = EPS_MAINTANANCE;
+            if( buffer.FindSubString("resources_available.power_status = up") != -1 ) status = EPS_UP;
+            if( buffer.FindSubString("resources_available.power_status = down") != -1 ) status = EPS_DOWN;
+        }
+        pclose(p_sf);
+    } else {
+        CSmallString err;
+        err << "unable to execute get node stat command '" << cmd << "'";
+        ES_ERROR(cmd);
+        // unable to run - do not mark the node
+    }
+
+    return(status);
 }
 
 //==============================================================================

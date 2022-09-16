@@ -69,6 +69,35 @@ CStatDatagram::CStatDatagram(void)
 
 //------------------------------------------------------------------------------
 
+void CStatDatagram::Clear(void)
+{
+    memset(Header,0,HEADER_SIZE);
+    memset(NodeName,0,NAME_SIZE);
+    memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
+    memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(LocalLoginType,0,MAX_TTYS);
+    memset(ActiveLocalUserName,0,NAME_SIZE);
+    memset(ActiveLocalLoginName,0,NAME_SIZE);
+    ActiveLocalLoginType = ' ';
+    memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
+    memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
+    memset(RemoteLoginType,' ',MAX_TTYS);
+
+    NumOfLocalUsers = 0;
+    NumOfRemoteUsers = 0;
+    NumOfRDSKRemoteUsers = 0;
+    NumOfVNCRemoteUsers = 0;
+
+    CSmallTimeAndDate time;
+    time.GetActualTimeAndDate();
+    TimeStamp = time.GetSecondsFromBeginning();
+
+    PowerDown = 0;
+    CheckSum = 0;
+}
+
+//------------------------------------------------------------------------------
+
 void CStatDatagram::SetDatagram(bool powerdown)
 {
     memset(Header,0,HEADER_SIZE);
@@ -89,6 +118,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
     NumOfVNCRemoteUsers = 0;
 
     TimeStamp = 0;
+    PowerDown = 0;
     CheckSum = 0;
 
     memcpy(Header,"STAT",4);
@@ -223,6 +253,21 @@ void CStatDatagram::SetDatagram(bool powerdown)
     PowerDown = 0;
     if( powerdown ){
         PowerDown = 1;
+        // clear :-(
+        memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
+        memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
+        memset(LocalLoginType,0,MAX_TTYS);
+        memset(ActiveLocalUserName,0,NAME_SIZE);
+        memset(ActiveLocalLoginName,0,NAME_SIZE);
+        ActiveLocalLoginType = ' ';
+        memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
+        memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
+        memset(RemoteLoginType,' ',MAX_TTYS);
+
+        NumOfLocalUsers = 0;
+        NumOfRemoteUsers = 0;
+        NumOfRDSKRemoteUsers = 0;
+        NumOfVNCRemoteUsers = 0;
     }
 
 // finalize -----------------------

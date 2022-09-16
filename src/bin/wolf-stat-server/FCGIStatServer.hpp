@@ -37,12 +37,14 @@
 #include <SmallTimeAndDate.hpp>
 #include <map>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 //------------------------------------------------------------------------------
 
 class CCompNode {
 public:
     CCompNode(void);
+    void Clear(void);
 public:
     CStatDatagram   Basic;
     bool            InPowerOnMode;
@@ -50,6 +52,17 @@ public:
 
     bool            InStartVNCMode;
     int             StartVNCTime;
+};
+
+typedef boost::shared_ptr<CCompNode>   CCompNodePtr;
+
+//------------------------------------------------------------------------------
+
+enum EPowerStat {
+    EPS_DOWN,
+    EPS_UP,
+    EPS_MAINTANANCE,
+    EPS_UNKNOWN,
 };
 
 //------------------------------------------------------------------------------
@@ -88,8 +101,9 @@ private:
     CSmallString        URLTmp;
     CSmallString        PowerOnCMD;
     CSmallString        StartRDSKCMD;
+    CSmallString        GetNodeStatCMD;
 
-    std::map<std::string,CCompNode> Nodes;
+    std::map<std::string,CCompNodePtr> Nodes;
 
     static  void CtrlCSignalHandler(int signal);
     virtual bool AcceptRequest(void);
@@ -108,6 +122,10 @@ private:
                              CTemplateParams& template_params);
 
     bool IsSocketLive(const CSmallString& socket);
+    bool CanPowerUp(const CSmallString& node);
+    bool CanStartRDSK(const CSmallString& node);
+
+    EPowerStat GetNodePowerStat(const CSmallString& node);
 
     // configuration options ---------------------------------------------------
     bool LoadConfig(void);

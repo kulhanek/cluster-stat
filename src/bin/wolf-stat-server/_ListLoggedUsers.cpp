@@ -45,11 +45,11 @@ bool CFCGIStatServer::_ListLoggedUsers(CFCGIRequest& request)
 {
     NodesMutex.Lock();
 
-    std::map<std::string,CCompNode>::iterator it = Nodes.begin();
-    std::map<std::string,CCompNode>::iterator ie = Nodes.end();
+    std::map<std::string,CCompNodePtr>::iterator it = Nodes.begin();
+    std::map<std::string,CCompNodePtr>::iterator ie = Nodes.end();
 
     while( it != ie ){
-        CStatDatagram dtg = it->second.Basic;
+        CStatDatagram dtg = it->second->Basic;
 
         // check node status
         CSmallString status = "up";
