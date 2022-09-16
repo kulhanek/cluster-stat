@@ -348,6 +348,24 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
+        if( (status == "up") || (status == "vnc") ){
+            CSmallString quota;
+            stringstream str;
+            try{
+                str << format(QuotaFlag)%ruser;
+                quota << str.str();
+            } catch (...) {
+                CSmallString err;
+                err << "unable to format quota flag '" << QuotaFlag << "'";
+                ES_ERROR(err);
+                quota = NULL;
+                quota << "blabla";
+            }
+            if( CFileSystem::IsFile(quota) == true ){
+                status = "quota";
+            }
+        }
+
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');

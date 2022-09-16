@@ -102,6 +102,7 @@ private:
     CSmallString        PowerOnCMD;
     CSmallString        StartRDSKCMD;
     CSmallString        GetNodeStatCMD;
+    CSmallString        QuotaFlag;
 
     std::map<std::string,CCompNodePtr> Nodes;
 

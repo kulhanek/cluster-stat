@@ -97,6 +97,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
     StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\" \"%3%\"";
     GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes  pbsnodes -v %1%";
+    QuotaFlag       = "/home/%1%.quotaoverdue";
 }
 
 //==============================================================================
@@ -359,6 +360,7 @@ bool CFCGIStatServer::LoadConfig(void)
         p_ele->GetAttribute("poweron",PowerOnCMD);
         p_ele->GetAttribute("rdsk",StartRDSKCMD);
         p_ele->GetAttribute("nodestat",GetNodeStatCMD);
+        p_ele->GetAttribute("quota",QuotaFlag);
     }
 
     vout << "#" << endl;
@@ -372,6 +374,7 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# PowerOn CMD (poweron)    = " << PowerOnCMD << endl;
     vout << "# Start RDSK (rdsk)        = " << StartRDSKCMD << endl;
     vout << "# Node status (nodestat)   = " << GetNodeStatCMD << endl;
+    vout << "# Quota overdue (quota)    = " << QuotaFlag << endl;
     vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
