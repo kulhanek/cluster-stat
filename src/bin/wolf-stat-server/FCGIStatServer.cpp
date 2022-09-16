@@ -358,6 +358,7 @@ bool CFCGIStatServer::LoadConfig(void)
         p_ele->GetAttribute("url",URLTmp);
         p_ele->GetAttribute("poweron",PowerOnCMD);
         p_ele->GetAttribute("rdsk",StartRDSKCMD);
+        p_ele->GetAttribute("nodestat",GetNodeStatCMD);
     }
 
     vout << "#" << endl;
@@ -370,7 +371,7 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# URL Template (url)       = " << URLTmp << endl;
     vout << "# PowerOn CMD (poweron)    = " << PowerOnCMD << endl;
     vout << "# Start RDSK (rdsk)        = " << StartRDSKCMD << endl;
-
+    vout << "# Node status (nodestat)   = " << GetNodeStatCMD << endl;
     vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
