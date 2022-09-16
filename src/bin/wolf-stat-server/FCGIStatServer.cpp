@@ -97,7 +97,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
     StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\" \"%3%\"";
     GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes  pbsnodes -v %1%";
-    QuotaFlag       = "/home/%1%.quotaoverdue";
+    QuotaFlag       = "/home/%1%.overquota";
 }
 
 //==============================================================================
