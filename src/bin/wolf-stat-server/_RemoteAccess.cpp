@@ -408,7 +408,7 @@ EPowerStat CFCGIStatServer::GetNodePowerStat(const CSmallString& node)
         cmd << "/bin/false";
     }
 
-    cout << "> Get node stat: " << node << endl;
+   // cout << "> Get node stat: " << node << endl;
 
     FILE* p_sf = popen(cmd,"r");
     if( p_sf ){
