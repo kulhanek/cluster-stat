@@ -88,10 +88,7 @@ void CStatDatagram::Clear(void)
     NumOfRDSKRemoteUsers = 0;
     NumOfVNCRemoteUsers = 0;
 
-    CSmallTimeAndDate time;
-    time.GetActualTimeAndDate();
-    TimeStamp = time.GetSecondsFromBeginning();
-
+    TimeStamp = 0;
     PowerDown = 0;
     CheckSum = 0;
 }
