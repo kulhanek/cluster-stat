@@ -390,7 +390,7 @@ bool CFCGIStatServer::LoadConfig(void)
                 node->Basic.SetNodeName(name);
                 Nodes[string(name)]=node;
             }
-            p_node->GetNextSiblingElement("node");
+            p_node = p_node->GetNextSiblingElement("node");
         }
     }
 
