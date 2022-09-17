@@ -288,6 +288,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                 }
             }
         }
+
         if( (status != "maintenance") && (status != "poweron") ){
             if( node->Basic.IsDown() || (nstat == EPS_DOWN) ){
                 status = "maintenance"; // keep node in maintenance during poweroff procedure
@@ -298,6 +299,14 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                     status = "down";
                     node->Clear();
                 }
+            }
+        }
+
+        if( status == "up" ){
+            diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
+            if( (nstat == EPS_UP) && (diff > 180) ){
+                // some weird node status
+                status = "maintenance";
             }
         }
 
