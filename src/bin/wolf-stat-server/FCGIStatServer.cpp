@@ -385,7 +385,7 @@ bool CFCGIStatServer::LoadConfig(void)
         while( p_node != NULL ) {
             CSmallString name;
             if( p_node->GetAttribute("name",name) == true ){
-                vout << "  < " << name << endl;
+                vout << "  * " << name << endl;
                 CCompNodePtr node(new CCompNode);
                 node->Basic.SetNodeName(name);
                 Nodes[string(name)]=node;
