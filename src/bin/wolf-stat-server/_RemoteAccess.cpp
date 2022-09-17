@@ -262,6 +262,8 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
     CSmallTimeAndDate ctime;
     ctime.GetActualTimeAndDate();
 
+    int diff;
+
     while( it != ie ){
         CCompNodePtr node = it->second;
 
@@ -272,21 +274,15 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         EPowerStat nstat = GetNodePowerStat(node->Basic.GetNodeName());
         if( nstat == EPS_MAINTANANCE ){
             status = "maintenance";
-            int diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
+            diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
             if( diff > 180 ){  // skew of 180 seconds
                 node->Clear();
             }
         }
 
         if( status != "maintenance" ){
-            // check timestamp from user stat file
-            int diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
-            if(  (diff > 180) || node->Basic.IsDown() || nstat == EPS_DOWN ){  // skew of 180 seconds
-                status = "down";
-                node->Clear();
-            }
-            diff = ctime.GetSecondsFromBeginning() - node->PowerOnTime;
             if( node->InPowerOnMode ){
+                diff = ctime.GetSecondsFromBeginning() - node->PowerOnTime;
                 if( diff < 180 ){
                     status = "poweron";
                 } else {
@@ -294,11 +290,18 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                     node->InPowerOnMode = false;
                     node->Clear();
                 }
+            } else {
+                // check timestamp from user stat file
+                diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
+                if(  (diff > 180) || node->Basic.IsDown() || nstat == EPS_DOWN ){  // skew of 180 seconds
+                    status = "down";
+                    node->Clear();
+                }
             }
         }
 
         if( (status != "poweron") && (status != "down") && (status != "maintenance") ) {
-            int diff = ctime.GetSecondsFromBeginning() - node->StartVNCTime;
+            diff = ctime.GetSecondsFromBeginning() - node->StartVNCTime;
             if( node->InStartVNCMode ){
                 if( diff < 60 ){
                     status = "startvnc";

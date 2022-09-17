@@ -377,6 +377,23 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# Quota overdue (quota)    = " << QuotaFlag << endl;
     vout << endl;
 
+    vout << "#" << endl;
+    vout << "# === [nodes] ==================================================================" << endl;
+    CXMLElement* p_nodes = ServerConfig.GetChildElementByPath("config/nodes");
+    if( p_nodes != NULL ) {
+        CXMLElement* p_node = p_nodes->GetFirstChildElement("node");
+        while( p_node != NULL ) {
+            CSmallString name;
+            if( p_node->GetAttribute("name",name) == true ){
+                vout << "  < " << name << endl;
+                CCompNodePtr node(new CCompNode);
+                node->Basic.SetNodeName(name);
+                Nodes[string(name)]=node;
+            }
+        }
+         p_node->GetNextSiblingElement("node");
+    }
+
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
     Watcher.ProcessWatcherControl(vout,p_watcher);
     vout << endl;
