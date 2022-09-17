@@ -275,7 +275,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         if( nstat == EPS_MAINTANANCE ){
             status = "maintenance";
             diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
-            if( diff > 180 ){  // skew of 180 seconds
+            if( diff > 240 ){  // skew 4m
                 node->Clear();
             }
         }
@@ -283,17 +283,18 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         if( status != "maintenance" ){
             if( node->InPowerOnMode ){
                 diff = ctime.GetSecondsFromBeginning() - node->PowerOnTime;
-                if( diff < 180 ){
+                if( diff < 240 ){       // allowed skew 4m
                     status = "poweron";
-                } else {
-                    status = "down";
-                    node->InPowerOnMode = false;
-                    node->Clear();
                 }
-            } else {
-                // check timestamp from user stat file
+            }
+        }
+        if( (status != "maintenance") && (status != "poweron") ){
+            if( node->Basic.IsDown() || (nstat == EPS_DOWN) ){
+                status = "maintenance"; // keep node in maintenance during poweroff procedure
+            }
+            if( status == "maintenance" ) {
                 diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
-                if(  (diff > 180) || node->Basic.IsDown() || nstat == EPS_DOWN ){  // skew of 180 seconds
+                if( diff > 240 ){   // skew 4m
                     status = "down";
                     node->Clear();
                 }
