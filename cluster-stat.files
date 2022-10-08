@@ -1,3 +1,4 @@
+README.md
 share/cluster-stat-client.cron
 share/cluster-stat-server.service
 src/bin/cluster-stat-client/ClientOptions.cpp

@@ -1,6 +1,10 @@
-# WOLF Stat Server #
-Simple FCGI application that provides information about usage of [WOLF](https://wolf.ncbr.muni.cz) cluster nodes.
+# Cluster Stat #
+Simple tools collecting information about usage of small linux cluster and simplifing remote access. These tools are the part of complex setup, which altogether provide the following functionality in a web browser:
+- teachers have information about logged users in a computer class room
+- all users have information about utilization of individual computers
+- turn on computers on demand (computers are automatically powered off when no used)
+- starting and opening remote desktop (TigerVNC+noVNC)
 
 ## Installation ##
-Helper scripts for installation can be found in the [wolf-stat-server-build](https://github.com/kulhanek/wolf-stat-server-build) repository.
-Installation scripts download the wolf-stat-server git repository and all its dependencies, compile them and then install wolf-stat-server to the installation directory.
+Helper scripts for installation can be found in the [cluster-stat-build](https://github.com/kulhanek/cluster-stat-build) repository.
+These scripts download the cluster-stat git repository and all its dependencies, compile and install them.

@@ -6,3 +6,4 @@ src/bin/cluster-stat-client
 share
 src/bin/cluster-stat-server/pbs
 src/bin/cluster-stat-server/batchsys
+.
