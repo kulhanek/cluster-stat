@@ -1,7 +1,10 @@
 // =============================================================================
-// wolf-stat-client
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
-//    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -18,27 +21,27 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include <ClientOptions.hpp>
+#include <ServerOptions.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CStatClientOptions::CStatClientOptions(void)
+CServerOptions::CServerOptions(void)
 {
     SetShowMiniUsage(true);
 }
 
 //------------------------------------------------------------------------------
 
-int CStatClientOptions::CheckOptions(void)
+int CServerOptions::CheckOptions(void)
 {
     return(SO_CONTINUE);
 }
 
 //------------------------------------------------------------------------------
 
-int CStatClientOptions::FinalizeOptions(void)
+int CServerOptions::FinalizeOptions(void)
 {
     bool ret_opt = false;
 
@@ -57,13 +60,6 @@ int CStatClientOptions::FinalizeOptions(void)
         return(SO_EXIT);
     }
 
-    return(SO_CONTINUE);
-}
-
-//------------------------------------------------------------------------------
-
-int CStatClientOptions::CheckArguments(void)
-{
     return(SO_CONTINUE);
 }
 

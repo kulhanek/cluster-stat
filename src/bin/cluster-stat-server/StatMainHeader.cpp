@@ -1,5 +1,5 @@
 // =============================================================================
-//  WOLF Stat Server
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
 //    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
 //
@@ -24,8 +24,7 @@
 
 //------------------------------------------------------------------------------
 
-const char* StatConfigVersion    = STAT_CONFIG_VERSION;
-const char* StatBuildVersion     = STAT_VERSION "(" STAT_BUILDTIME ") [WolfStat]";
+const char* StatBuildVersion     = STAT_VERSION "(" STAT_BUILDTIME ") [ClusterStat]";
 
 //==============================================================================
 //------------------------------------------------------------------------------

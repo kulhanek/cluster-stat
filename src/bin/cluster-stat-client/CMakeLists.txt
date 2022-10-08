@@ -6,17 +6,17 @@
 SET(STAT_SRC
         StatClient.cpp
         ClientOptions.cpp
-        ../wolf-stat-server/StatDatagram.cpp
-        ../wolf-stat-server/StatMainHeader.cpp
+        ../cluster-stat-server/StatDatagram.cpp
+        ../cluster-stat-server/StatMainHeader.cpp
         )
 
 # final build ------------------------------------------------------------------
-ADD_EXECUTABLE(wolf-stat-client ${STAT_SRC})
+ADD_EXECUTABLE(cluster-stat-client ${STAT_SRC})
 
-TARGET_LINK_LIBRARIES(wolf-stat-client ${WOLF_LIBS})
+TARGET_LINK_LIBRARIES(cluster-stat-client ${STAT_LIBS})
 
 INSTALL(TARGETS
-            wolf-stat-client
+            cluster-stat-client
         DESTINATION
             bin
         )

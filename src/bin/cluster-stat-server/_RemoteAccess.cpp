@@ -1,5 +1,5 @@
 // =============================================================================
-//  WOLF Stat Server
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
 //     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
@@ -88,7 +88,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         return(_RemoteAccessList(request));
     }
 
-// call wolf-poweron script
+// call poweron script
     CSmallString cmd;
     stringstream str;
     try {

@@ -1,7 +1,7 @@
 #ifndef StatMainHeaderH
 #define StatMainHeaderH
 // =============================================================================
-//  WOLF Stat Server
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
 //    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
 //
@@ -25,7 +25,6 @@
 
 //------------------------------------------------------------------------------
 
-extern const char* StatConfigVersion;
 extern const char* StatBuildVersion;
 
 //------------------------------------------------------------------------------

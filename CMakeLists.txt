@@ -1,11 +1,11 @@
 # ==============================================================================
-# WOLF CMake File
+# ClusterStat CMake File
 # ==============================================================================
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10 FATAL_ERROR)
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
 
-PROJECT(WOLFStat)
+PROJECT(CLusterStat)
 
 # ==============================================================================
 # conditional setup ------------------------------------------------------------
@@ -21,7 +21,7 @@ SET(STAT_TARGET "both"  CACHE STRING "targets: server, client, both")
 # ==============================================================================
 
 # define project name ----------------------------
-SET(WOLF_VERSION 3.0.x)
+SET(CLUSTER_STAT_VERSION 3.0.x)
 
 # what languages we use --------------------------
 ENABLE_LANGUAGE(CXX)
@@ -74,7 +74,7 @@ LINK_DIRECTORIES(${W3TK_ROOT}/lib)
 SET(W3TK_LIB_NAME w3tk)
 
 # all libs ---------------------------------------
-SET(WOLF_LIBS
+SET(STAT_LIBS
         ${W3TK_LIB_NAME}
         ${HIPOLY_LIB_NAME}
         )

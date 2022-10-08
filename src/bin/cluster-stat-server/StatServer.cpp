@@ -163,7 +163,7 @@ void CStatServer::ExecuteThread(void)
             continue;
         }
 
-        WolfStatServer.RegisterNode(datagram);
+        ClusterStatServer.RegisterNode(datagram);
 
         SuccessfulRequests++;
     }

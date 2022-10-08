@@ -1,7 +1,7 @@
-#ifndef WolfStatClientH
-#define WolfStatClientH
+#ifndef ClusterStatClientH
+#define ClusterStatClientH
 // =============================================================================
-// wolf-stat-client
+// cluster-stat-client
 // -----------------------------------------------------------------------------
 //    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
 //

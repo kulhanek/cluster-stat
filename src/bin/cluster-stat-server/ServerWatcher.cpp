@@ -1,5 +1,5 @@
 // =============================================================================
-//  WOLF Stat Server
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
 //     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)

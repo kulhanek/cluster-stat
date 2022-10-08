@@ -1,10 +1,7 @@
 // =============================================================================
-//  WOLF Stat Server
+// cluster-stat-client
 // -----------------------------------------------------------------------------
-//     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
-//     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
-//     Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
-//     Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
+//    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -21,27 +18,27 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include <ServerOptions.hpp>
+#include <ClientOptions.hpp>
 
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CServerOptions::CServerOptions(void)
+CStatClientOptions::CStatClientOptions(void)
 {
     SetShowMiniUsage(true);
 }
 
 //------------------------------------------------------------------------------
 
-int CServerOptions::CheckOptions(void)
+int CStatClientOptions::CheckOptions(void)
 {
     return(SO_CONTINUE);
 }
 
 //------------------------------------------------------------------------------
 
-int CServerOptions::FinalizeOptions(void)
+int CStatClientOptions::FinalizeOptions(void)
 {
     bool ret_opt = false;
 
@@ -60,6 +57,13 @@ int CServerOptions::FinalizeOptions(void)
         return(SO_EXIT);
     }
 
+    return(SO_CONTINUE);
+}
+
+//------------------------------------------------------------------------------
+
+int CStatClientOptions::CheckArguments(void)
+{
     return(SO_CONTINUE);
 }
 

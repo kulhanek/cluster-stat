@@ -1,5 +1,5 @@
 # ==============================================================================
-# WOLF CMake File
+# Cluster CMake File
 # ==============================================================================
 
 INCLUDE_DIRECTORIES(batchsys)
@@ -27,12 +27,12 @@ SET(PROG_SRC
         )
 
 # final build ------------------------------------------------------------------
-ADD_EXECUTABLE(wolf-stat-server ${PROG_SRC})
+ADD_EXECUTABLE(cluster-stat-server ${PROG_SRC})
 
-TARGET_LINK_LIBRARIES(wolf-stat-server ${WOLF_LIBS})
+TARGET_LINK_LIBRARIES(cluster-stat-server ${STAT_LIBS})
 
 INSTALL(TARGETS
-            wolf-stat-server
+            cluster-stat-server
         RUNTIME DESTINATION
             bin
         )

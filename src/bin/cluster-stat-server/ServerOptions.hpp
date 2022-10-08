@@ -1,9 +1,12 @@
-#ifndef WolfStatClientOptionsH
-#define WolfStatClientOptionsH
+#ifndef ServerOptionsH
+#define ServerOptionsH
 // =============================================================================
-// wolf-stat-client
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
-//    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
+//     Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -25,18 +28,18 @@
 
 //------------------------------------------------------------------------------
 
-class CStatClientOptions : public CSimpleOptions {
+class CServerOptions : public CSimpleOptions {
 public:
     // constructor - tune option setup
-    CStatClientOptions(void);
+    CServerOptions(void);
 
     // program name and description -----------------------------------------------
     CSO_PROG_NAME_BEGIN
-    "wolf-stat-client"
+    "cluster-stat-server.fcgi"
     CSO_PROG_NAME_END
 
     CSO_PROG_DESC_BEGIN
-    "The program notifies the server about logged users."
+    "FastCGI server providing information about utilization of linux cluster."
     CSO_PROG_DESC_END
 
     CSO_PROG_VERS_BEGIN
@@ -45,43 +48,14 @@ public:
 
     // list of all options and arguments ------------------------------------------
     CSO_LIST_BEGIN
-    // arguments ------------------------------
-    CSO_ARG(CSmallString,ServerName)
     // options ------------------------------
-    CSO_OPT(int,Port)
-    CSO_OPT(int,Interval)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
     CSO_LIST_END
 
     CSO_MAP_BEGIN
-    // description of arguments ---------------------------------------------------
-    CSO_MAP_ARG(CSmallString,                   /* argument type */
-                ServerName,                          /* argument name */
-                NULL,                           /* default value */
-                true,                           /* is argument mandatory */
-                "servername",                        /* parametr name */
-                "IP address or name of server, which collects statististics\n")   /* argument description */
     // description of options -----------------------------------------------------
-    CSO_MAP_OPT(int,                            /* option type */
-                Port,                           /* option name */
-                32598,                          /* default value */
-                false,                          /* is option mandatory */
-                'p',                           /* short option name */
-                "port",                      /* long option name */
-                "PORT",                           /* parametr name */
-                "port number for communication")   /* option description */
-    //----------------------------------------------------------------------
-    CSO_MAP_OPT(int,                            /* option type */
-                Interval,                           /* option name */
-                15,                          /* default value */
-                false,                          /* is option mandatory */
-                'i',                           /* short option name */
-                "interval",                      /* long option name */
-                "TIME",                           /* parametr name */
-                "delay between regular node status updates (zero value means one shot update)")   /* option description */
-    //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */
                 false,                          /* default value */
@@ -114,7 +88,6 @@ public:
 private:
     virtual int CheckOptions(void);
     virtual int FinalizeOptions(void);
-    virtual int CheckArguments(void);
 };
 
 //------------------------------------------------------------------------------

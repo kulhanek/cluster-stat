@@ -1,0 +1,8 @@
+src
+src/bin/cluster-stat-server
+etc
+src/bin
+src/bin/cluster-stat-client
+share
+src/bin/cluster-stat-server/pbs
+src/bin/cluster-stat-server/batchsys

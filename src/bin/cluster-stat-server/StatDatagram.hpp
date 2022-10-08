@@ -1,7 +1,7 @@
 #ifndef StatDatagramH
 #define StatDatagramH
 // =============================================================================
-// wolf-stat-client
+// cluster-stat-client
 // -----------------------------------------------------------------------------
 //    Copyright (C) 2021      Petr Kulhanek, kulhanek@chemi.muni.cz
 //    Copyright (C) 2019      Petr Kulhanek, kulhanek@chemi.muni.cz

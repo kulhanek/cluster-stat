@@ -1,5 +1,5 @@
 // =============================================================================
-//  WOLF Stat Server
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
 //     Copyright (C) 2015 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //     Copyright (C) 2012 Petr Kulhanek (kulhanek@chemi.muni.cz)
@@ -40,17 +40,13 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
-
-const char* LibBuildVersion_WOLF_Web = "wolf-stat-server 3.0";
-
 //==============================================================================
 //------------------------------------------------------------------------------
 //==============================================================================
 
-CFCGIStatServer WolfStatServer;
+CFCGIStatServer ClusterStatServer;
 
-MAIN_ENTRY_OBJECT(WolfStatServer)
+MAIN_ENTRY_OBJECT(ClusterStatServer)
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -88,15 +84,15 @@ void CCompNode::Clear(void)
 
 CFCGIStatServer::CFCGIStatServer(void)
 {
-    FCGIPort = 32597;
-    StatPort = 32598;
-    MaxNodes = 100;
-    RDSKPath = "/var/lib/websockify";
-    DomainName  = "ncbr.muni.cz";
+    FCGIPort        = 32597;
+    StatPort        = 32598;
+    MaxNodes        = 100;
+    RDSKPath        = "/var/lib/websockify";
+    DomainName      = "ncbr.muni.cz";
     URLTmp          = "https://wolf.ncbr.muni.cz/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/%1%/%2%&autoconnect=true";
     PowerOnCMD      = "/opt/wolf-poweron/wolf-poweron --nowait --noheader \"%1%\"";
     StartRDSKCMD    = "/opt/wolf-remote-desktop/sbin/startrdsk \"%1%\" \"%2%\" \"%3%\"";
-    GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes  pbsnodes -v %1%";
+    GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes pbsnodes -v %1%";
     QuotaFlag       = "/home/%1%.overquota";
 }
 
@@ -126,7 +122,7 @@ int CFCGIStatServer::Init(int argc,char* argv[])
     vout << low;
     vout << endl;
     vout << "# ==============================================================================" << endl;
-    vout << "# wolf-stat-server.fcgi started at " << dt.GetSDateAndTime() << endl;
+    vout << "# cluster-stat-server.fcgi started at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
     // load server config
@@ -184,7 +180,7 @@ void CFCGIStatServer::Finalize(void)
 
     vout << low;
     vout << "# ==============================================================================" << endl;
-    vout << "# wolf-stat-server.fcgi terminated at " << dt.GetSDateAndTime() << endl;
+    vout << "# cluster-stat-server.fcgi terminated at " << dt.GetSDateAndTime() << endl;
     vout << "# ==============================================================================" << endl;
 
     if( ErrorSystem.IsError() || Options.GetOptVerbose() ){
@@ -307,7 +303,7 @@ bool CFCGIStatServer::ProcessCommonParams(CFCGIRequest& request,
 
     // FCGI setup
     template_params.SetParam("SERVERSCRIPTURI",server_script_uri);
-    template_params.SetParam("WOLFVER",LibBuildVersion_WOLF_Web);
+    template_params.SetParam("CLUSTERSTAT_VER",StatBuildVersion);
 
     return(true);
 }
@@ -318,11 +314,11 @@ bool CFCGIStatServer::ProcessCommonParams(CFCGIRequest& request,
 
 void CFCGIStatServer::CtrlCSignalHandler(int signal)
 {
-    WolfStatServer.vout << endl << endl;
-    WolfStatServer.vout << "SIGINT or SIGTERM signal recieved. Initiating server shutdown!" << endl;
-    WolfStatServer.vout << "Waiting for server finalization ... " << endl;
-    WolfStatServer.TerminateServer();
-    if( ! WolfStatServer.Options.GetOptVerbose() ) WolfStatServer.vout << endl;
+    ClusterStatServer.vout << endl << endl;
+    ClusterStatServer.vout << "SIGINT or SIGTERM signal recieved. Initiating server shutdown!" << endl;
+    ClusterStatServer.vout << "Waiting for server finalization ... " << endl;
+    ClusterStatServer.TerminateServer();
+    if( ! ClusterStatServer.Options.GetOptVerbose() ) ClusterStatServer.vout << endl;
 }
 
 //==============================================================================
@@ -335,8 +331,8 @@ bool CFCGIStatServer::LoadConfig(void)
 
     config_path = ETCDIR;
     // FIXME
-    config_path = "/opt/wolf-stat-server/3.0/etc";
-    config_path = config_path / "wolf-stat-server.xml";
+    config_path = "/opt/cluster-stat-server/3.0/etc";
+    config_path = config_path / "cluster-stat-server.xml";
 
     CXMLParser xml_parser;
     xml_parser.SetOutputXMLNode(&ServerConfig);
