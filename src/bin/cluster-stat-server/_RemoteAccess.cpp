@@ -276,7 +276,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         // node status
         EPowerStat nstat = GetNodePowerStat(node->Basic.GetNodeName());
-        if( (nstat == EPS_MAINTANANCE) && (nstat == EPS_UNKNOWN) ){
+        if( (nstat == EPS_MAINTANANCE) || (nstat == EPS_UNKNOWN) ){
             status = "maintenance";
             diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
             if( diff > 240 ){  // skew 4m
