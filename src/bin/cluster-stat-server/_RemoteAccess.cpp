@@ -346,7 +346,8 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                     rnode << "." << DomainName;
                 }
                 try{
-                    str << format(URLTmp)%ruser%rnode;
+                    CSmallString server = request.Params.GetValue("SERVER_NAME");
+                    str << format(URLTmp)%server%ruser%rnode;
                 } catch(...) {
                     ES_ERROR("wrong url tmp");
                 }
