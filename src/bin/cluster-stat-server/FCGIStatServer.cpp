@@ -91,7 +91,7 @@ CFCGIStatServer::CFCGIStatServer(void)
     DomainName      = "ncbr.muni.cz";
     URLTmp          = "https://%1%/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/%2%/%3%&autoconnect=true";
     PowerOnCMD      = "/opt/node-poweron/node-poweron --nowait --noheader \"%1%\"";
-    StartRDSKCMD    = "/opt/rdsk-full-gui/sbin/startrdsk \"%1%\" \"%2%\" \"%3%\"";
+    StartRDSKCMD    = "/opt/node-stat-server/startrdsk \"%1%\" \"%2%\" \"%3%\"";
     GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes pbsnodes -v %1%";
     QuotaFlag       = "/home/%1%.overquota";
 }
