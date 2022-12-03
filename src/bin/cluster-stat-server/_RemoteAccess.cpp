@@ -88,6 +88,27 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         return(_RemoteAccessList(request));
     }
 
+    CSmallTimeAndDate ctime;
+    ctime.GetActualTimeAndDate();
+
+// mark the node
+    NodesMutex.Lock();
+
+    CCompNodePtr cnode;
+
+    if( Nodes.count(string(node)) == 1 ){
+        cnode = Nodes[string(node)];
+    } else {
+        cnode = CCompNodePtr(new CCompNode);
+        cnode->Basic.SetNodeName(node);
+        Nodes[string(node)] = cnode;
+    }
+
+    cnode->InPowerOnMode = true;
+    cnode->PowerOnTime = ctime.GetSecondsFromBeginning();
+
+    NodesMutex.Unlock();
+
 // call poweron script
     CSmallString cmd;
     stringstream str;
@@ -110,27 +131,8 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
         err << "unable to execute power on command '" << cmd << "'";
         ES_ERROR(cmd);
         // unable to run - do not mark the node
-        return(_RemoteAccessList(request));
+        cnode->InPowerOnMode = false;
     }
-
-// mark the node
-    NodesMutex.Lock();
-
-    CSmallTimeAndDate ctime;
-    ctime.GetActualTimeAndDate();
-
-    if( Nodes.count(string(node)) == 1 ){
-        Nodes[string(node)]->InPowerOnMode = true;
-        Nodes[string(node)]->PowerOnTime = ctime.GetSecondsFromBeginning();
-    } else {
-        CCompNodePtr data(new CCompNode);
-        data->Basic.SetNodeName(node);
-        data->InPowerOnMode = true;
-        data->PowerOnTime  = ctime.GetSecondsFromBeginning();
-        Nodes[string(node)] = data;
-    }
-
-    NodesMutex.Unlock();
 
 // send the node list
     return(_RemoteAccessList(request));
@@ -183,6 +185,27 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
         return(_RemoteAccessList(request));
     }
 
+    CSmallTimeAndDate ctime;
+    ctime.GetActualTimeAndDate();
+
+// mark the node
+    NodesMutex.Lock();
+
+    CCompNodePtr cnode;
+
+    if( Nodes.count(string(node)) == 1 ){
+        cnode = Nodes[string(node)];
+    } else {
+        cnode = CCompNodePtr(new CCompNode);
+        cnode->Basic.SetNodeName(node);
+        Nodes[string(node)] = cnode;
+    }
+
+    cnode->InStartVNCMode = true;
+    cnode->StartVNCTime   = ctime.GetSecondsFromBeginning();
+
+    NodesMutex.Unlock();
+
 // start RDSK
     CSmallString cmd;
     stringstream str;
@@ -205,27 +228,8 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
         err << "unable to execute start rdks command '" << cmd << "'";
         ES_ERROR(cmd);
         // unable to run - do not mark the node
-        return(_RemoteAccessList(request));
+        cnode->InStartVNCMode = false;
     }
-
-    CSmallTimeAndDate ctime;
-    ctime.GetActualTimeAndDate();
-
-// mark the node
-    NodesMutex.Lock();
-
-    if( Nodes.count(string(node)) == 1 ){
-        Nodes[string(node)]->InStartVNCMode = true;
-        Nodes[string(node)]->StartVNCTime   = ctime.GetSecondsFromBeginning();
-    } else {
-        CCompNodePtr data(new CCompNode);
-        data->Basic.SetNodeName(node);
-        data->InStartVNCMode = true;
-        data->StartVNCTime   = ctime.GetSecondsFromBeginning();
-        Nodes[string(node)] = data;
-    }
-
-    NodesMutex.Unlock();
 
 // send the node list
     return(_RemoteAccessList(request));
@@ -238,7 +242,7 @@ bool CFCGIStatServer::CanStartRDSK(const CSmallString& node)
     EPowerStat status = GetNodePowerStat(node);
 
     if( status == EPS_UP ){
-        // we start RDSK on node, which is UP
+        // we can start RDSK on node, which is UP
         return(true);
     }
 
@@ -272,7 +276,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         // node status
         EPowerStat nstat = GetNodePowerStat(node->Basic.GetNodeName());
-        if( nstat == EPS_MAINTANANCE ){
+        if( (nstat == EPS_MAINTANANCE) && (nstat == EPS_UNKNOWN) ){
             status = "maintenance";
             diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
             if( diff > 240 ){  // skew 4m
