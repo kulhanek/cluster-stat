@@ -94,8 +94,11 @@ void CBatchSystemWatcher::ExecuteThread(void)
             } else {
                 ES_WARNING("unable to connect to PBS server");
             }
+            cout << "pbs - problem" << endl;
             continue;
         }
+
+        cout << "pbs - here" << endl;
 
         if( PBSPro.UpdateNodes() == false ){
             Connected = false;
