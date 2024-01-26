@@ -1,10 +1,9 @@
-#ifndef PBSProNodeH
-#define PBSProNodeH
+#ifndef BatchSystemWatcherH
+#define BatchSystemWatcherH
 // =============================================================================
-// ABS - Advanced Batch System
+//  Cluster Stat Server
 // -----------------------------------------------------------------------------
-//    Copyright (C) 2011      Petr Kulhanek, kulhanek@chemi.muni.cz
-//    Copyright (C) 2001-2008 Petr Kulhanek, kulhanek@chemi.muni.cz
+//     Copyright (C) 2024 Petr Kulhanek (kulhanek@chemi.muni.cz)
 //
 //     This program is free software; you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -21,22 +20,33 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include <Node.hpp>
+#include <SmartThread.hpp>
+#include <SmallTime.hpp>
+#include <VerboseStr.hpp>
+#include <XMLElement.hpp>
 
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-/// computational node
-
-class CPBSProNode : public CNode {
+class CBatchSystemWatcher : public CSmartThread {
 public:
 // constructor -----------------------------------------------------------------
-        CPBSProNode(void);
+    CBatchSystemWatcher(void);
 
-// methods ---------------------------------------------------------------------
-    /// init node with batch system information
-    bool Init(const CSmallString& srv_name,const CSmallString& short_srv_name,struct batch_status* p_node);
+    //! read common setup
+    bool ProcessBatchSystemControl(CVerboseStr& vout,CXMLElement* p_config);
+
+// section of private data -----------------------------------------------------
+private:
+    CSmallString    PBSProLibNames;
+    CSmallString    PBSServerName;
+    int             PoolingTime;
+    int             RessurectionTime;
+    bool            Connected;
+
+    // main loop
+    virtual void ExecuteThread(void);
 };
 
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #endif

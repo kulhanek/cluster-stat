@@ -38,6 +38,7 @@
 #include <map>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <BatchSystemWatcher.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -91,6 +92,7 @@ private:
     CTerminalStr        Console;
     CVerboseStr         vout;
     CServerWatcher      Watcher;
+    CBatchSystemWatcher BatchSystem;
     CStatServer         StatServer;
     CSimpleMutex        NodesMutex;
     int                 FCGIPort;

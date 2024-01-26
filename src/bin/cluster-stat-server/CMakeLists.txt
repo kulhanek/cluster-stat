@@ -7,7 +7,6 @@ INCLUDE_DIRECTORIES(batchsys/pbspro)
 
 # program objects --------------------------------------------------------------
 SET(PROG_SRC
-        prefix.c
         StatMainHeader.cpp
         ServerOptions.cpp
         FCGIStatServer.cpp
@@ -19,11 +18,9 @@ SET(PROG_SRC
         _RemoteAccess.cpp
         _Debug.cpp
         _Error.cpp
-#        batchsys/PBSProJob.cpp
-#        batchsys/PBSProNode.cpp
-#        batchsys/PBSProQueue.cpp
-#        batchsys/PBSProAttr.cpp
-#        batchsys/PBSProServer.cpp
+        batchsys/PBSProAttr.cpp
+        batchsys/PBSProServer.cpp
+        BatchSystemWatcher.cpp
         )
 
 # final build ------------------------------------------------------------------

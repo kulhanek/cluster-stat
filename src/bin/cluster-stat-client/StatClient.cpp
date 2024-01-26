@@ -87,29 +87,33 @@ bool CStatClient::Run(void)
     signal(SIGINT,CtrlCSignalHandler);
     signal(SIGTERM,CtrlCSignalHandler);
 
-    do {
-        Datagram.SetDatagram(false);
+    if( (Options.GetOptInterval() > 0) || (Options.GetOptShutdown() == false) ) {
+        do {
+            Datagram.SetDatagram(false);
+            vout << high;
+            Datagram.PrintInfo(vout);
+
+            if( SendDataToServer(Options.GetArgServerName(),Options.GetOptPort()) == false ) {
+                ES_ERROR("unable to send datagram");
+                return(false);
+            }
+            if( Options.GetOptInterval() > 0 ){
+                sleep(Options.GetOptInterval());
+            }
+
+        } while( (Terminated == false) && (Options.GetOptInterval() != 0) );
+    }
+
+// send termination datagram
+    if( Options.GetOptShutdown() == true ) {
+        Datagram.SetDatagram(true);
         vout << high;
         Datagram.PrintInfo(vout);
 
         if( SendDataToServer(Options.GetArgServerName(),Options.GetOptPort()) == false ) {
-            ES_ERROR("unable to send datagram");
+            ES_ERROR("unable to send termination datagram");
             return(false);
         }
-        if( Options.GetOptInterval() > 0 ){
-            sleep(Options.GetOptInterval());
-        }
-
-    } while( (Terminated == false) && (Options.GetOptInterval() != 0) );
-
-// send termination datagram
-    Datagram.SetDatagram(true);
-    vout << high;
-    Datagram.PrintInfo(vout);
-
-    if( SendDataToServer(Options.GetArgServerName(),Options.GetOptPort()) == false ) {
-        ES_ERROR("unable to send termination datagram");
-        return(false);
     }
 
     return(true);

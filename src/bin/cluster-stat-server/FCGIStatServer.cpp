@@ -34,7 +34,6 @@
 #include <XMLPrinter.hpp>
 #include <XMLText.hpp>
 #include <iostream>
-#include <prefix.h>
 
 //------------------------------------------------------------------------------
 
@@ -146,6 +145,7 @@ bool CFCGIStatServer::Run(void)
 
     // start servers
     Watcher.StartThread();          // watcher
+    BatchSystem.StartThread();      // batch system
     StatServer.StartThread();       // stat server
     if( StartServer() == false ) {  // fcgi server
         return(false);
@@ -160,6 +160,9 @@ bool CFCGIStatServer::Run(void)
 
     Watcher.TerminateThread();
     Watcher.WaitForThread();
+
+    BatchSystem.TerminateThread();
+    BatchSystem.WaitForThread();
 
     vout << "# Number of client total requests      = " << StatServer.AllRequests << endl;
     vout << "# Number of client successful requests = " << StatServer.SuccessfulRequests << endl;
@@ -329,7 +332,6 @@ bool CFCGIStatServer::LoadConfig(void)
 {
     CFileName    config_path;
 
-    config_path = ETCDIR;
     // FIXME
     config_path = "/opt/node-stat-server/3.0/etc";
     config_path = config_path / "cluster-stat-server.xml";
@@ -392,6 +394,10 @@ bool CFCGIStatServer::LoadConfig(void)
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
     Watcher.ProcessWatcherControl(vout,p_watcher);
+    vout << endl;
+
+    CXMLElement* p_batchsys = ServerConfig.GetChildElementByPath("config/batch_system");
+    BatchSystem.ProcessBatchSystemControl(vout,p_batchsys);
     vout << endl;
 
     return(true);

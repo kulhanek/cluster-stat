@@ -23,8 +23,6 @@
 
 #include <DynamicPackage.hpp>
 #include <iostream>
-#include <Job.hpp>
-#include <BatchServer.hpp>
 
 // -----------------------------------------------------------------------------
 
@@ -52,7 +50,7 @@ typedef int (*PBS_ERRNO)(void);
 
 // -----------------------------------------------------------------------------
 
-class CPBSProServer : public CBatchServer {
+class CPBSProServer {
 public:
 // constructor -----------------------------------------------------------------
         CPBSProServer(void);
@@ -60,80 +58,30 @@ public:
 
 // init batch system subsystem -------------------------------------------------------
     //! load symbols and connect to server
-    bool Init(const CSmallString& server_name,const CSmallString& short_name,
-              const CSmallString& alt_names,bool job_transfer);
+    bool Init(const CSmallString& libs_tok,const CSmallString& server_name);
 
-// enumeration -----------------------------------------------------------------
-    //! init queue list
-    bool GetQueues(CQueueList& queues);
+    //! connect to server
+    bool ConnectToServer(void);
 
-    //! init node list
-    bool GetNodes(CNodeList& nodes);
-
-    //! get given node
-    const CNodePtr GetNode(const CSmallString& name);
-
-    //! init all job list
-    bool GetAllJobs(CJobList& jobs,bool include_history);
-
-    //! get queue jobs
-    bool GetQueueJobs(CJobList& jobs,const CSmallString& queue_name,bool include_history);
-
-    //! init job list of given user
-    bool GetUserJobs(CJobList& jobs,const CSmallString& user,bool include_history);
-
-    //! init job list by job id
-    bool GetJob(CJobList& jobs,const CSmallString& jobid);
-
-    //! get job by job id
-    const CJobPtr GetJob(const CSmallString& jobid);
-
-    //! print technical info about queues
-    bool PrintQueues(std::ostream& sout);
-
-    //! print technical info about nodes
-    bool PrintNodes(std::ostream& sout);
-
-    //! print technical info about single node
-    bool PrintNode(std::ostream& sout,const CSmallString& name);
-
-    //! print technical info about jobs
-    bool PrintJobs(std::ostream& sout,bool include_history);
-
-    //! print technical info about single job
-    bool PrintJob(std::ostream& sout,const CSmallString& jobid,bool include_history);
-
-    //! locate job - return server name for the job
-    const CSmallString LocateJob(const CSmallString& jobid);
+    //! disconnect from server
+    bool DisconnectFromServer(void);
 
 // execution -------------------------------------------------------------------
-
-    //! get job status
-    bool GetJobStatus(CJob& job);
-
-    //! kill job
-    bool KillJob(CJob& job);
-
     //! get last error message
     const CSmallString GetLastErrorMsg(void);
 
-    //! decode batch attributes
-    void CreateJobAttributes(struct attropl* &p_prev,CResourceList* p_rl);
+    //! update node statuses
+    bool UpdateNodes(void);
 
 // section of private data -----------------------------------------------------
 private:
+    CSmallString    ServerName;
     CSmallString    PBSProLibName;
     CDynamicPackage PBSProLib;
     int             ServerID;
 
     // init symbols
     bool InitSymbols(void);
-
-    // connect to server
-    bool ConnectToServer(void);
-
-    // disconnect from server
-    bool DisconnectFromServer(void);
 
     // print batch_status
     void PrintBatchStatus(std::ostream& sout,struct batch_status* p_bs);

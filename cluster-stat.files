@@ -5,6 +5,8 @@ src/bin/cluster-stat-client/ClientOptions.cpp
 src/bin/cluster-stat-client/ClientOptions.hpp
 src/bin/cluster-stat-client/StatClient.cpp
 src/bin/cluster-stat-client/StatClient.hpp
+src/bin/cluster-stat-server/BatchSystemWatcher.cpp
+src/bin/cluster-stat-server/BatchSystemWatcher.hpp
 src/bin/cluster-stat-server/StatMainHeader.cpp
 src/bin/cluster-stat-server/StatMainHeader.hpp
 src/bin/cluster-stat-server/StatMainHeaderConfig.hpp

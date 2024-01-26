@@ -50,6 +50,7 @@ public:
     // options ------------------------------
     CSO_OPT(int,Port)
     CSO_OPT(int,Interval)
+    CSO_OPT(bool,Shutdown)
     CSO_OPT(bool,Help)
     CSO_OPT(bool,Version)
     CSO_OPT(bool,Verbose)
@@ -80,7 +81,16 @@ public:
                 'i',                           /* short option name */
                 "interval",                      /* long option name */
                 "TIME",                           /* parametr name */
-                "delay between regular node status updates (zero value means one shot update)")   /* option description */
+                "delay (in seconds) between regular node status updates (zero value means one shot update)")   /* option description */
+    //----------------------------------------------------------------------
+    CSO_MAP_OPT(bool,                           /* option type */
+                Shutdown,                        /* option name */
+                false,                          /* default value */
+                false,                          /* is option mandatory */
+                's',                           /* short option name */
+                "shutdown",                      /* long option name */
+                NULL,                           /* parametr name */
+                "sent shutdown notification")   /* option description */
     //----------------------------------------------------------------------
     CSO_MAP_OPT(bool,                           /* option type */
                 Verbose,                        /* option name */
