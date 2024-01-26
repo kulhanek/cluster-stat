@@ -272,71 +272,12 @@ bool CPBSProServer::UpdateNodes(void)
         return(false);
     }
 
-    ClusterStatServer.NodesMutex.Lock();
-
-    while( p_node_attrs != NULL ){
-        string node_name = string(p_node_attrs->name);
-        // get short name
-        node_name = node_name.substr(0,node_name.find("."));
-        cout << "node: " << node_name <<  endl;
-        if( ClusterStatServer.Nodes.count(node_name) == 1 ){
-            CSmallString ps;
-            get_attribute(p_node_attrs->attribs,"resources_available","power_status",ps);
-            EPowerStat status = EPS_UNKNOWN;
-            if( ps == "maintenance" ) status = EPS_MAINTANANCE;
-            if( ps == "up" ) status = EPS_UP;
-            if( ps == "down" ) status = EPS_DOWN;
-            cout << "node: " << node_name << " st:" << status <<" (" << ps <<")" << endl;
-            ClusterStatServer.Nodes[node_name]->PowerStat = status;
-        }
-
-        p_node_attrs = p_node_attrs->next;
-    }
-
-    ClusterStatServer.NodesMutex.Unlock();
+    ClusterStatServer.UpdateNodePowerStatus(p_node_attrs);
 
     pbspro_statfree(p_node_attrs);
 
     return(true);
 }
-
-////------------------------------------------------------------------------------
-
-//EPowerStat CFCGIStatServer::GetNodePowerStat(const CSmallString& node)
-//{
-//    EPowerStat status = EPS_UNKNOWN;
-
-//    CSmallString cmd;
-//    stringstream str;
-//    try{
-//        str << format(GetNodeStatCMD)%node;
-//        cmd << str.str();
-//    } catch (...) {
-//        CSmallString err;
-//        err << "unable to format get node stat command '" << GetNodeStatCMD << "'";
-//        ES_ERROR(err);
-//        cmd = NULL;
-//        cmd << "/bin/false";
-//    }
-
-//   // cout << "> Get node stat: " << node << endl;
-
-//    FILE* p_sf = popen(cmd,"r");
-//    if( p_sf ){
-//        CSmallString buffer;
-//        while( buffer.ReadLineFromFile(p_sf,true,true) ){
-
-//        }
-//        pclose(p_sf);
-//    } else {
-//        CSmallString err;
-//        err << "unable to execute get node stat command '" << cmd << "'";
-//        ES_ERROR(cmd);
-//        // unable to run - do not mark the node
-//    }
-
-//    return(status);
-//}
 
 //==============================================================================
 //------------------------------------------------------------------------------

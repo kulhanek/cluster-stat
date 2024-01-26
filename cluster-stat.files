@@ -1,4 +1,6 @@
 README.md
+etc/cluster-stat-server.xml
+etc/wolf-stat-server.xml
 share/cluster-stat-client.cron
 share/cluster-stat-server.service
 src/bin/cluster-stat-client/ClientOptions.cpp

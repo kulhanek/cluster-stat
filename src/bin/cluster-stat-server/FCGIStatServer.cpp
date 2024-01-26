@@ -34,6 +34,8 @@
 #include <XMLPrinter.hpp>
 #include <XMLText.hpp>
 #include <iostream>
+#include <pbs_ifl.h>
+#include <PBSProAttr.hpp>
 
 //------------------------------------------------------------------------------
 
@@ -93,7 +95,6 @@ CFCGIStatServer::CFCGIStatServer(void)
     URLTmp          = "https://%1%/bluezone/noVNC/vnc.html?path=/bluezone/rdsk/%2%/%3%&autoconnect=true";
     PowerOnCMD      = "/opt/node-poweron/node-poweron --nowait --noheader \"%1%\"";
     StartRDSKCMD    = "/opt/node-stat-server/startrdsk \"%1%\" \"%2%\" \"%3%\"";
-    GetNodeStatCMD  = "PBSPRO_IGNORE_KERBEROS=yes pbsnodes -v %1% 2> /dev/null";
     QuotaFlag       = "/home/%1%.overquota";
 }
 
@@ -406,6 +407,34 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << endl;
 
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
+{
+    NodesMutex.Lock();
+
+    while( p_node_attrs != NULL ){
+        string node_name = string(p_node_attrs->name);
+        // get short name
+        node_name = node_name.substr(0,node_name.find("."));
+        cout << "node: " << node_name <<  endl;
+        if( Nodes.count(node_name) == 1 ){
+            CSmallString ps;
+            get_attribute(p_node_attrs->attribs,"resources_available","power_status",ps);
+            EPowerStat status = EPS_UNKNOWN;
+            if( ps == "maintenance" ) status = EPS_MAINTANANCE;
+            if( ps == "up" ) status = EPS_UP;
+            if( ps == "down" ) status = EPS_DOWN;
+            // DEBUG: cout << "node: " << node_name << " st:" << status <<" (" << ps <<")" << endl;
+            Nodes[node_name]->PowerStat = status;
+        }
+
+        p_node_attrs = p_node_attrs->next;
+    }
+
+    NodesMutex.Unlock();
 }
 
 //==============================================================================

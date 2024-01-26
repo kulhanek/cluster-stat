@@ -87,6 +87,10 @@ public:
     /// register node
     void RegisterNode(CStatDatagram& dtg);
 
+
+    /// update node power status
+    void UpdateNodePowerStatus(struct batch_status* p_node_attrs);
+
 // section of private data -----------------------------------------------------
 private:
     CServerOptions      Options;
@@ -105,7 +109,6 @@ private:
     CSmallString        URLTmp;
     CSmallString        PowerOnCMD;
     CSmallString        StartRDSKCMD;
-    CSmallString        GetNodeStatCMD;
     CSmallString        QuotaFlag;
 
     std::map<std::string,CCompNodePtr> Nodes;
@@ -132,8 +135,6 @@ private:
 
     // configuration options ---------------------------------------------------
     bool LoadConfig(void);
-
-    friend class CPBSProServer;
 };
 
 //------------------------------------------------------------------------------
