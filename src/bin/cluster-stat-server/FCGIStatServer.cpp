@@ -152,15 +152,18 @@ bool CFCGIStatServer::Run(void)
     }
 
     vout << low;
-    vout << "Waiting for server termination ..." << endl;
+    vout << "Waiting for server terminations ..." << endl;
     WaitForServer();
 
+    vout << "Waiting for STAT server termination ..." << endl;
     StatServer.TerminateServer();
     StatServer.WaitForThread();
 
+    vout << "Waiting for watcher server termination ..." << endl;
     Watcher.TerminateThread();
     Watcher.WaitForThread();
 
+    vout << "Waiting for batch system server termination ..." << endl;
     BatchSystem.TerminateThread();
     BatchSystem.WaitForThread();
 
