@@ -72,8 +72,10 @@ bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElemen
 
     if( PBSPro.Init(PBSProLibNames,PBSServerName) == true ){
         Connected = true;
+        cout << "PBS - connected" << endl;
     } else {
         ES_WARNING("unable to connect to PBS server");
+        cout << "PBS - not connected" << endl;
         return(true);
     }
 
@@ -88,6 +90,7 @@ void CBatchSystemWatcher::ExecuteThread(void)
 {      
     while( ! ThreadTerminated ) {
         if( Connected == false ){
+            cout << "PBS - ressurect" << endl;
             sleep(RessurectionTime);
             if( PBSPro.ConnectToServer() == true ){
                 Connected = true;
