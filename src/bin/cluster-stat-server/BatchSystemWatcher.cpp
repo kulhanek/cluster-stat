@@ -35,7 +35,7 @@ using namespace std;
 
 CBatchSystemWatcher::CBatchSystemWatcher(void)
 {
-    PoolingTime         = 30;
+    PoolingTime         = 20;
     RessurectionTime    = 120;
     Connected           = false;
 }
@@ -72,10 +72,10 @@ bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElemen
 
     if( PBSPro.Init(PBSProLibNames,PBSServerName) == true ){
         Connected = true;
-        cout << "PBS - connected" << endl;
+        // DEBUG: cout << "PBS - connected" << endl;
     } else {
         ES_WARNING("unable to connect to PBS server");
-        cout << "PBS - not connected" << endl;
+        // DEBUG: cout << "PBS - not connected" << endl;
         return(true);
     }
 
@@ -87,21 +87,24 @@ bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElemen
 //==============================================================================
 
 void CBatchSystemWatcher::ExecuteThread(void)
-{      
+{
+    // disable kerberos
+    setenv("PBSPRO_IGNORE_KERBEROS","yes",1);
+
     while( ! ThreadTerminated ) {
         if( Connected == false ){
-            cout << "PBS - ressurect" << endl;
+            // DEBUG: cout << "PBS - ressurect" << endl;
             sleep(RessurectionTime);
             if( PBSPro.ConnectToServer() == true ){
                 Connected = true;
             } else {
                 ES_WARNING("unable to connect to PBS server");
             }
-            cout << "pbs - problem" << endl;
+            // DEBUG: cout << "pbs - problem" << endl;
             continue;
         }
 
-        cout << "pbs - here" << endl;
+        // DEBUG: cout << "pbs - here" << endl;
 
         if( PBSPro.UpdateNodes() == false ){
             Connected = false;

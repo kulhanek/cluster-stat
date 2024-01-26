@@ -142,7 +142,7 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 bool CFCGIStatServer::CanPowerUp(const CSmallString& node)
 {
-    EPowerStat status = GetNodePowerStat(node);
+    EPowerStat status = Nodes[string(node)]->PowerStat;
 
     if( status == EPS_DOWN ){
         // we can turn on the node, which is down
@@ -239,7 +239,7 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 
 bool CFCGIStatServer::CanStartRDSK(const CSmallString& node)
 {
-    EPowerStat status = GetNodePowerStat(node);
+    EPowerStat status = Nodes[string(node)]->PowerStat;
 
     if( status == EPS_UP ){
         // we can start RDSK on node, which is UP
@@ -275,7 +275,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         CSmallString rdsk_url = "";
 
         // node status
-        EPowerStat nstat = GetNodePowerStat(node->Basic.GetNodeName());
+        EPowerStat nstat = node->PowerStat;
         if( (nstat == EPS_MAINTANANCE) || (nstat == EPS_UNKNOWN) ){
             status = "maintenance";
             diff = ctime.GetSecondsFromBeginning() - node->Basic.GetTimeStamp();
@@ -423,46 +423,6 @@ bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
     }
 
     return(isactive);
-}
-
-//------------------------------------------------------------------------------
-
-EPowerStat CFCGIStatServer::GetNodePowerStat(const CSmallString& node)
-{
-    EPowerStat status = EPS_UNKNOWN;
-
-    CSmallString cmd;
-    stringstream str;
-    try{
-        str << format(GetNodeStatCMD)%node;
-        cmd << str.str();
-    } catch (...) {
-        CSmallString err;
-        err << "unable to format get node stat command '" << GetNodeStatCMD << "'";
-        ES_ERROR(err);
-        cmd = NULL;
-        cmd << "/bin/false";
-    }
-
-   // cout << "> Get node stat: " << node << endl;
-
-    FILE* p_sf = popen(cmd,"r");
-    if( p_sf ){
-        CSmallString buffer;
-        while( buffer.ReadLineFromFile(p_sf,true,true) ){
-            if( buffer.FindSubString("resources_available.power_status = maintenance") != -1 ) status = EPS_MAINTANANCE;
-            if( buffer.FindSubString("resources_available.power_status = up") != -1 ) status = EPS_UP;
-            if( buffer.FindSubString("resources_available.power_status = down") != -1 ) status = EPS_DOWN;
-        }
-        pclose(p_sf);
-    } else {
-        CSmallString err;
-        err << "unable to execute get node stat command '" << cmd << "'";
-        ES_ERROR(cmd);
-        // unable to run - do not mark the node
-    }
-
-    return(status);
 }
 
 //==============================================================================

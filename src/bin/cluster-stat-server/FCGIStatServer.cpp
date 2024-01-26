@@ -21,7 +21,7 @@
 //     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 // =============================================================================
 
-#include "FCGIStatServer.hpp"
+#include <FCGIStatServer.hpp>
 #include <FCGIRequest.hpp>
 #include <ErrorSystem.hpp>
 #include <SmallTimeAndDate.hpp>
@@ -58,6 +58,8 @@ CCompNode::CCompNode(void)
 
     InStartVNCMode = false;
     StartVNCTime = 0;
+
+    PowerStat = EPS_UNKNOWN;
 
     Basic.Clear();
 }

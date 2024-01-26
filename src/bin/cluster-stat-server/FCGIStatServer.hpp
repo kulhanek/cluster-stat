@@ -42,6 +42,15 @@
 
 //------------------------------------------------------------------------------
 
+enum EPowerStat {
+    EPS_DOWN,
+    EPS_UP,
+    EPS_MAINTANANCE,
+    EPS_UNKNOWN,
+};
+
+//------------------------------------------------------------------------------
+
 class CCompNode {
 public:
     CCompNode(void);
@@ -53,18 +62,11 @@ public:
 
     bool            InStartVNCMode;
     int             StartVNCTime;
+
+    EPowerStat      PowerStat;
 };
 
 typedef boost::shared_ptr<CCompNode>   CCompNodePtr;
-
-//------------------------------------------------------------------------------
-
-enum EPowerStat {
-    EPS_DOWN,
-    EPS_UP,
-    EPS_MAINTANANCE,
-    EPS_UNKNOWN,
-};
 
 //------------------------------------------------------------------------------
 
@@ -128,10 +130,10 @@ private:
     bool CanPowerUp(const CSmallString& node);
     bool CanStartRDSK(const CSmallString& node);
 
-    EPowerStat GetNodePowerStat(const CSmallString& node);
-
     // configuration options ---------------------------------------------------
     bool LoadConfig(void);
+
+    friend class CPBSProServer;
 };
 
 //------------------------------------------------------------------------------
