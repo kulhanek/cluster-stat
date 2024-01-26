@@ -396,11 +396,11 @@ bool CFCGIStatServer::LoadConfig(void)
     }
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
-    Watcher.ProcessWatcherControl(vout,p_watcher);
+    if( Watcher.ProcessWatcherControl(vout,p_watcher) == false ) return(false);
     vout << endl;
 
     CXMLElement* p_batchsys = ServerConfig.GetChildElementByPath("config/batch_system");
-    BatchSystem.ProcessBatchSystemControl(vout,p_batchsys);
+     if( BatchSystem.ProcessBatchSystemControl(vout,p_batchsys) == false ) return(false);
     vout << endl;
 
     return(true);
