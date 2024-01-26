@@ -396,6 +396,7 @@ bool CFCGIStatServer::LoadConfig(void)
             p_node = p_node->GetNextSiblingElement("node");
         }
     }
+    vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
     if( Watcher.ProcessWatcherControl(vout,p_watcher) == false ) return(false);
@@ -418,7 +419,7 @@ void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
         string node_name = string(p_node_attrs->name);
         // get short name
         node_name = node_name.substr(0,node_name.find("."));
-        cout << "node: " << node_name <<  endl;
+        // DEBUG: cout << "node: " << node_name <<  endl;
         if( Nodes.count(node_name) == 1 ){
             CCompNodePtr node = Nodes[node_name];
             get_attribute(p_node_attrs->attribs,"resources_available","ncpus",node->NCPUs);

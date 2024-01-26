@@ -49,6 +49,7 @@ CServerWatcher::CServerWatcher(void)
 
 bool CServerWatcher::ProcessWatcherControl(CVerboseStr& vout,CXMLElement* p_config)
 {
+    vout << "#" << endl;
     vout << "# === [watcher] ================================================================" << endl;
 
     if( p_config == NULL ){

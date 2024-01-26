@@ -46,6 +46,7 @@ CBatchSystemWatcher::CBatchSystemWatcher(void)
 
 bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElement* p_config)
 {
+    vout << "#" << endl;
     vout << "# === [pbs] ====================================================================" << endl;
 
     if( p_config == NULL ){
