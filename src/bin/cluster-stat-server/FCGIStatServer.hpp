@@ -64,6 +64,8 @@ public:
     int             StartVNCTime;
 
     EPowerStat      PowerStat;
+    int             NCPUs;
+    int             NGPUs;
 };
 
 typedef boost::shared_ptr<CCompNode>   CCompNodePtr;
@@ -129,6 +131,7 @@ private:
     bool ProcessCommonParams(CFCGIRequest& request,
                              CTemplateParams& template_params);
 
+    bool HasKerberos(CFCGIRequest& request);
     bool IsSocketLive(const CSmallString& socket);
     bool CanPowerUp(const CSmallString& node);
     bool CanStartRDSK(const CSmallString& node);

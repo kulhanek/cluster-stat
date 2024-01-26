@@ -140,23 +140,6 @@ bool CFCGIStatServer::_RemoteAccessWakeOnLAN(CFCGIRequest& request,const CSmallS
 
 //------------------------------------------------------------------------------
 
-bool CFCGIStatServer::CanPowerUp(const CSmallString& node)
-{
-    EPowerStat status = Nodes[string(node)]->PowerStat;
-
-    if( status == EPS_DOWN ){
-        // we can turn on the node, which is down
-        return(true);
-    }
-
-    // up
-    // maintenance
-    // unknown
-    return(true);
-}
-
-//------------------------------------------------------------------------------
-
 bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallString& node)
 {
     CSmallString ruser      = request.Params.GetValue("REMOTE_USER");
@@ -233,23 +216,6 @@ bool CFCGIStatServer::_RemoteAccessStartVNC(CFCGIRequest& request,const CSmallSt
 
 // send the node list
     return(_RemoteAccessList(request));
-}
-
-//------------------------------------------------------------------------------
-
-bool CFCGIStatServer::CanStartRDSK(const CSmallString& node)
-{
-    EPowerStat status = Nodes[string(node)]->PowerStat;
-
-    if( status == EPS_UP ){
-        // we can start RDSK on node, which is UP
-        return(true);
-    }
-
-    // down
-    // maintenance
-    // unknown
-    return(true);
 }
 
 //------------------------------------------------------------------------------
@@ -366,7 +332,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
-        if( (status == "up") || (status == "vnc") ){
+        if( status == "up" ){
             CSmallString quota;
             stringstream str;
             try{
@@ -384,12 +350,22 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             }
         }
 
+        if( status == "up" ){
+            if( HasKerberos(request) == false ){
+                status = "up-nokrb";
+            }
+        }
+
         // write response
         request.OutStream.PutStr(status); // node status
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(node->Basic.GetNodeName()); // node name
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(rdsk_url);
+        request.OutStream.PutChar(';');
+        request.OutStream.PutStr(node->NCPUs);
+        request.OutStream.PutChar(';');
+        request.OutStream.PutStr(node->NGPUs);
         request.OutStream.PutChar('\n');
 
         it++;
@@ -401,6 +377,18 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
     request.FinishRequest();
 
     return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::HasKerberos(CFCGIRequest& request)
+{
+    string krb5ccname = string(request.Params.GetValue("KRB5CCNAME"));
+    krb5ccname.erase(0,5); // remove 'FILE:'
+    if( krb5ccname.empty() ){
+        krb5ccname = "NONE";
+    }
+    return(CFileSystem::IsFile(krb5ccname));
 }
 
 //------------------------------------------------------------------------------
@@ -423,6 +411,40 @@ bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
     }
 
     return(isactive);
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::CanStartRDSK(const CSmallString& node)
+{
+    EPowerStat status = Nodes[string(node)]->PowerStat;
+
+    if( status == EPS_UP ){
+        // we can start RDSK on node, which is UP
+        return(true);
+    }
+
+    // down
+    // maintenance
+    // unknown
+    return(true);
+}
+
+//------------------------------------------------------------------------------
+
+bool CFCGIStatServer::CanPowerUp(const CSmallString& node)
+{
+    EPowerStat status = Nodes[string(node)]->PowerStat;
+
+    if( status == EPS_DOWN ){
+        // we can turn on the node, which is down
+        return(true);
+    }
+
+    // up
+    // maintenance
+    // unknown
+    return(true);
 }
 
 //==============================================================================

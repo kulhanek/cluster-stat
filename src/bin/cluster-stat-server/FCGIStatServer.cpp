@@ -62,6 +62,7 @@ CCompNode::CCompNode(void)
     StartVNCTime = 0;
 
     PowerStat = EPS_UNKNOWN;
+    NGPUs = 0;
 
     Basic.Clear();
 }
@@ -419,6 +420,9 @@ void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
         node_name = node_name.substr(0,node_name.find("."));
         cout << "node: " << node_name <<  endl;
         if( Nodes.count(node_name) == 1 ){
+            CCompNodePtr node = Nodes[node_name];
+            get_attribute(p_node_attrs->attribs,"resources_available","ncpus",node->NCPUs);
+            get_attribute(p_node_attrs->attribs,"resources_available","ngpus",node->NGPUs);
             CSmallString ps;
             get_attribute(p_node_attrs->attribs,"resources_available","power_status",ps);
             EPowerStat status = EPS_UNKNOWN;
@@ -426,7 +430,7 @@ void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
             if( ps == "up" ) status = EPS_UP;
             if( ps == "down" ) status = EPS_DOWN;
             // DEBUG: cout << "node: " << node_name << " st:" << status <<" (" << ps <<")" << endl;
-            Nodes[node_name]->PowerStat = status;
+            node->PowerStat = status;
         }
 
         p_node_attrs = p_node_attrs->next;
