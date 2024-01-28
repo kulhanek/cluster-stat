@@ -315,7 +315,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( DomainName != NULL ){
                 socket = socket + "." + DomainName;
             }
-            if( IsSocketLive(socket) ){
+            if( IsSocketLive(socket) && (displayid != ":n.d.") ){
                 status = "vnc";
                 stringstream str;
                 CSmallString rnode;
