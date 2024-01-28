@@ -56,6 +56,7 @@ public:
     CSmallString GetRemoteUserName(int id);
     CSmallString GetRemoteLoginName(int id);
     char         GetRemoteLoginType(int id);
+    CSmallString GetRemoteDisplayID(int id);
 
     int          GetTimeStamp(void);
     bool         IsDown(void);
@@ -83,6 +84,7 @@ private:
     char    RemoteUserName[MAX_TTYS][NAME_SIZE];
     char    RemoteLoginName[MAX_TTYS][NAME_SIZE];
     char    RemoteLoginType[MAX_TTYS];
+    char    RemoteDisplayID[MAX_TTYS][NAME_SIZE];
     // service information
     int     PowerDown;
     int     TimeStamp;                      // time of "meassurement"

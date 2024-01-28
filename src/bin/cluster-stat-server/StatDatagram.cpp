@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -40,6 +41,7 @@
 
 using namespace std;
 using namespace boost;
+using namespace boost::algorithm;
 
 //==============================================================================
 //------------------------------------------------------------------------------
@@ -58,6 +60,8 @@ CStatDatagram::CStatDatagram(void)
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginType,' ',MAX_TTYS);
+    memset(RemoteDisplayID,0,NAME_SIZE*MAX_TTYS);
+
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
     NumOfRDSKRemoteUsers = 0;
@@ -82,6 +86,7 @@ void CStatDatagram::Clear(void)
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginType,' ',MAX_TTYS);
+    memset(RemoteDisplayID,0,NAME_SIZE*MAX_TTYS);
 
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
@@ -108,6 +113,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
     memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
     memset(RemoteLoginType,' ',MAX_TTYS);
+    memset(RemoteDisplayID,0,NAME_SIZE*MAX_TTYS);
 
     NumOfLocalUsers = 0;
     NumOfRemoteUsers = 0;
@@ -183,6 +189,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
         bool loctty = false;
         bool vnc = false;
         bool rdsk = false;
+        CSmallString displayid = ":n.a.";
 
         cmd << "/bin/loginctl show-session " << ses.SessionID;
         FILE* p_sf = popen(cmd,"r");
@@ -206,6 +213,15 @@ void CStatDatagram::SetDatagram(bool powerdown)
             buffer.SetLength(BUFFER_LEN);   // +1 for \0 is added internally
             while( buffer.ReadLineFromFile(p_sf,true,true) ){
                 if( buffer.FindSubString("Xvnc") != -1 ) vnc = true;
+                if( buffer.FindSubString("/opt/rdsk-full-gui/sbin/vncsession") != -1){
+                    std::string stext = std::string(buffer);
+                    trim(stext);
+                    vector<string>  words;
+                    split(words,stext,is_any_of(" "),token_compress_on);
+                    if( words.size() == 4 ){
+                        displayid = words[3];
+                    }
+                }
             }
             pclose(p_sf);
         }
@@ -231,6 +247,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
             if( NumOfRemoteUsers < MAX_TTYS ){
                 strncpy(RemoteUserName[NumOfRemoteUsers],ses.UserName,NAME_SIZE-1);
                 strncpy(RemoteLoginName[NumOfRemoteUsers],ses.LoginName,NAME_SIZE-1);
+                strncpy(RemoteDisplayID[NumOfRemoteUsers],displayid,NAME_SIZE-1);
                 if( rdsk == true ){
                     RemoteLoginType[NumOfRemoteUsers] = 'R';
                 } else if( vnc == true ){
@@ -260,6 +277,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
         memset(RemoteUserName,0,NAME_SIZE*MAX_TTYS);
         memset(RemoteLoginName,0,NAME_SIZE*MAX_TTYS);
         memset(RemoteLoginType,' ',MAX_TTYS);
+        memset(RemoteDisplayID,0,NAME_SIZE*MAX_TTYS);
 
         NumOfLocalUsers = 0;
         NumOfRemoteUsers = 0;
@@ -301,6 +319,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
         for(size_t i=0; i < NAME_SIZE; i++){
             CheckSum += (unsigned char)RemoteUserName[k][i];
             CheckSum += (unsigned char)RemoteLoginName[k][i];
+            CheckSum += (unsigned char)RemoteDisplayID[k][i];
         }
     }
     for(size_t i=0; i < MAX_TTYS; i++){
@@ -357,6 +376,7 @@ bool CStatDatagram::IsValid(void)
         for(size_t i=0; i < NAME_SIZE; i++){
             checksum += (unsigned char)RemoteUserName[k][i];
             checksum += (unsigned char)RemoteLoginName[k][i];
+            checksum += (unsigned char)RemoteDisplayID[k][i];
         }
     }
 
@@ -478,6 +498,17 @@ char CStatDatagram::GetRemoteLoginType(int id)
         return(RemoteLoginType[id]);
     }
     return(' ');
+}
+
+//------------------------------------------------------------------------------
+
+CSmallString CStatDatagram::GetRemoteDisplayID(int id)
+{
+    if( (id >= 0) && (id < MAX_TTYS) ){
+        RemoteDisplayID[id][NAME_SIZE-1] = '\0';
+        return(RemoteDisplayID[id]);
+    }
+    return(":n.d.");
 }
 
 //------------------------------------------------------------------------------

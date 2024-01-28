@@ -239,6 +239,8 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
 
         CSmallString status = "up";
         CSmallString rdsk_url = "";
+        CSmallString vncid = "";
+        CSmallString displayid = ":n.d.";
 
         // node status
         EPowerStat nstat = node->PowerStat;
@@ -300,6 +302,9 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                 }
                 if( node->Basic.GetRemoteLoginType(i) == 'V' ){
                     occupy = true;
+                    if( node->Basic.GetRemoteLoginName(i) == ruser ){
+                        displayid = node->Basic.GetRemoteDisplayID(i);
+                    }
                 }
             }
 
@@ -315,6 +320,9 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                 if( DomainName != NULL ){
                     rnode << "." << DomainName;
                 }
+
+                vncid << ruser << "@" << node->Basic.GetNodeName() << ":" << displayid;
+
                 try{
                     CSmallString server = request.Params.GetValue("SERVER_NAME");
                     str << format(URLTmp)%server%ruser%rnode;
@@ -362,6 +370,8 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         request.OutStream.PutStr(node->Basic.GetNodeName()); // node name
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(rdsk_url);
+        request.OutStream.PutChar(';');
+        request.OutStream.PutStr(vncid);
         request.OutStream.PutChar(';');
         request.OutStream.PutStr(node->NCPUs);
         request.OutStream.PutChar(';');

@@ -378,7 +378,6 @@ bool CFCGIStatServer::LoadConfig(void)
     vout << "# PowerOn CMD (poweron)    = " << PowerOnCMD << endl;
     vout << "# Start RDSK (rdsk)        = " << StartRDSKCMD << endl;
     vout << "# Quota overdue (quota)    = " << QuotaFlag << endl;
-    vout << endl;
 
     vout << "#" << endl;
     vout << "# === [nodes] ==================================================================" << endl;
@@ -396,16 +395,12 @@ bool CFCGIStatServer::LoadConfig(void)
             p_node = p_node->GetNextSiblingElement("node");
         }
     }
-    vout << endl;
 
     CXMLElement* p_watcher = ServerConfig.GetChildElementByPath("config/watcher");
     if( Watcher.ProcessWatcherControl(vout,p_watcher) == false ) return(false);
-    vout << endl;
 
     CXMLElement* p_batchsys = ServerConfig.GetChildElementByPath("config/batch_system");
      if( BatchSystem.ProcessBatchSystemControl(vout,p_batchsys) == false ) return(false);
-    vout << endl;
-
     return(true);
 }
 
