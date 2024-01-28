@@ -296,16 +296,19 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
             if( node->Basic.NumOfLocalUsers > 0 ){
                 occupy = true;
             }
+            // R - RDSK
+            // V - VNC
+            // S - ssh
             for(int i=0; i < node->Basic.NumOfRemoteUsers; i++){
                 if( node->Basic.GetRemoteLoginType(i) == 'R' ){
-                    occupy = true;
-                }
-                if( node->Basic.GetRemoteLoginType(i) == 'V' ){
                     occupy = true;
                     if( node->Basic.GetRemoteLoginName(i) == ruser ){
                         displayid = node->Basic.GetRemoteDisplayID(i);
                     }
                 }
+                if( node->Basic.GetRemoteLoginType(i) == 'V' ){
+                    occupy = true;
+                }               
             }
 
             CFileName socket = RDSKPath / ruser / node->Basic.GetNodeName();
