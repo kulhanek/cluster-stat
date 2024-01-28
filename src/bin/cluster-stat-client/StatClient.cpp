@@ -137,7 +137,7 @@ void CStatClient::CtrlCSignalHandler(int signal)
 {
     StatClient.vout << endl << endl;
     StatClient.vout << "SIGINT or SIGTERM signal recieved. Initiating server shutdown!" << endl;
-    StatClient.vout << "Waiting for server finalization ... " << endl;
+    StatClient.vout << "Waiting for service finalization ... " << endl;
 
     StatClient.Terminated = true;
 }

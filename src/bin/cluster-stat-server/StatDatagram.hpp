@@ -45,7 +45,7 @@ public:
 // getters ---------------------------------------------------------------------
     CSmallString GetNodeName(void);             // node name is always short
 
-    CSmallString GetLocalUserName(void);
+    CSmallString GetLocalUserName(void);        // active user name
     CSmallString GetLocalLoginName(void);
     char         GetLocalLoginType(void);
 

@@ -213,7 +213,8 @@ void CStatDatagram::SetDatagram(bool powerdown)
             buffer.SetLength(BUFFER_LEN);   // +1 for \0 is added internally
             while( buffer.ReadLineFromFile(p_sf,true,true) ){
                 if( buffer.FindSubString("Xvnc") != -1 ) vnc = true;
-                if( buffer.FindSubString("/opt/rdsk-full-gui/sbin/vncsession") != -1){
+                // the terminal space in the string is important
+                if( buffer.FindSubString("/opt/rdsk-full-gui/sbin/vncsession ") != -1){
                     std::string stext = std::string(buffer);
                     trim(stext);
                     vector<string>  words;
@@ -399,12 +400,29 @@ bool CStatDatagram::IsValid(void)
 void CStatDatagram::PrintInfo(std::ostream& vout)
 {
     vout << "Node  = " << GetNodeName() << endl;
-    vout << "User  = " << GetLocalUserName() << endl;
-    vout << "Login = " << GetLocalLoginName() << endl;
+    vout << ">> Active user" << endl;
+    vout << "Name        = " << GetLocalUserName() << endl;
+    vout << "Login name  = " << GetLocalLoginName() << endl;
+    vout << "Login Type  = " << GetLocalLoginType() << endl;
+
+    vout << ">> Local users" << endl;
     vout << "#L    = " << NumOfLocalUsers << endl;
+    for(int id=0; id < NumOfLocalUsers; id++){
+    vout << "#Name       = " << GetLocalUserName(id) << endl;
+    vout << "#Login name = " << GetLocalLoginName(id) << endl;
+    vout << "#Login type = = " << GetLocalLoginType(id) << endl;
+    }
+
+    vout << ">> Remote users" << endl;
     vout << "#R    = " << NumOfRemoteUsers << endl;
     vout << "#RDSK = " << NumOfRDSKRemoteUsers << endl;
     vout << "#VNC  = " << NumOfVNCRemoteUsers << endl;
+    for(int id=0; id < NumOfLocalUsers; id++){
+    vout << "#Name       = " << GetRemoteUserName(id) << endl;
+    vout << "#Login name = " << GetRemoteLoginName(id) << endl;
+    vout << "#Login type = = " << GetRemoteLoginType(id) << endl;
+    vout << "#Display    = = " << GetRemoteDisplayID(id) << endl;
+    }
 }
 
 //------------------------------------------------------------------------------
