@@ -417,7 +417,7 @@ void CStatDatagram::PrintInfo(std::ostream& vout)
     vout << "#R    = " << NumOfRemoteUsers << endl;
     vout << "#RDSK = " << NumOfRDSKRemoteUsers << endl;
     vout << "#VNC  = " << NumOfVNCRemoteUsers << endl;
-    for(int id=0; id < NumOfLocalUsers; id++){
+    for(int id=0; id < NumOfRemoteUsers; id++){
     vout << "#Name       = " << GetRemoteUserName(id) << endl;
     vout << "#Login name = " << GetRemoteLoginName(id) << endl;
     vout << "#Login type = = " << GetRemoteLoginType(id) << endl;
