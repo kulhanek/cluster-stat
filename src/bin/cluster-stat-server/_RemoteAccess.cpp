@@ -324,7 +324,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
                     rnode << "." << DomainName;
                 }
 
-                vncid << ruser << "@" << node->Basic.GetNodeName() << ":" << displayid;
+                vncid << ruser << "@" << node->Basic.GetFullNodeName() << displayid;
 
                 try{
                     CSmallString server = request.Params.GetValue("SERVER_NAME");

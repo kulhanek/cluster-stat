@@ -44,6 +44,7 @@ public:
 
 // getters ---------------------------------------------------------------------
     CSmallString GetNodeName(void);             // node name is always short
+    CSmallString GetFullNodeName(void);
 
     CSmallString GetLocalUserName(void);        // active user name
     CSmallString GetLocalLoginName(void);
@@ -67,6 +68,7 @@ public:
 private:
     char    Header[HEADER_SIZE];
     char    NodeName[NAME_SIZE];
+    char    FullNodeName[NAME_SIZE];
     // local users
     int     NumOfLocalUsers;
     char    LocalUserName[MAX_TTYS][NAME_SIZE];

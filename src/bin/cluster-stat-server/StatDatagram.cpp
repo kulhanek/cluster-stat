@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <list>
+#include <netdb.h>
 
 //------------------------------------------------------------------------------
 
@@ -51,6 +52,7 @@ CStatDatagram::CStatDatagram(void)
 {
     memset(Header,0,HEADER_SIZE);
     memset(NodeName,0,NAME_SIZE);
+    memset(FullNodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginType,0,MAX_TTYS);
@@ -77,6 +79,7 @@ void CStatDatagram::Clear(void)
 {
     memset(Header,0,HEADER_SIZE);
     memset(NodeName,0,NAME_SIZE);
+    memset(FullNodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginType,0,MAX_TTYS);
@@ -104,6 +107,7 @@ void CStatDatagram::SetDatagram(bool powerdown)
 {
     memset(Header,0,HEADER_SIZE);
     memset(NodeName,0,NAME_SIZE);
+    memset(FullNodeName,0,NAME_SIZE);
     memset(LocalUserName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginName,0,NAME_SIZE*MAX_TTYS);
     memset(LocalLoginType,0,MAX_TTYS);
@@ -127,6 +131,10 @@ void CStatDatagram::SetDatagram(bool powerdown)
     memcpy(Header,"STAT",4);
 
     gethostname(NodeName,NAME_SIZE-1);
+
+    struct hostent* h;
+    h = gethostbyname(NodeName);
+    strncpy(FullNodeName,h->h_name,NAME_SIZE-1);
 
     // get list of local sessions
     std::list<CUserSession> sessions;
@@ -298,6 +306,9 @@ void CStatDatagram::SetDatagram(bool powerdown)
     for(size_t i=0; i < NAME_SIZE; i++){
         CheckSum += (unsigned char)NodeName[i];
     }
+    for(size_t i=0; i < NAME_SIZE; i++){
+        CheckSum += (unsigned char)FullNodeName[i];
+    }
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
             CheckSum += (unsigned char)LocalUserName[k][i];
@@ -355,6 +366,9 @@ bool CStatDatagram::IsValid(void)
     for(size_t i=0; i < NAME_SIZE; i++){
         checksum += (unsigned char)NodeName[i];
     }
+    for(size_t i=0; i < NAME_SIZE; i++){
+        checksum += (unsigned char)FullNodeName[i];
+    }
     for(size_t k=0; k < MAX_TTYS; k++){
         for(size_t i=0; i < NAME_SIZE; i++){
             checksum += (unsigned char)LocalUserName[k][i];
@@ -399,29 +413,30 @@ bool CStatDatagram::IsValid(void)
 
 void CStatDatagram::PrintInfo(std::ostream& vout)
 {
-    vout << "Node  = " << GetNodeName() << endl;
+    vout << "Node (short) = " << GetNodeName() << endl;
+    vout << "Node         = " << GetFullNodeName() << endl;
     vout << ">> Active user" << endl;
-    vout << "Name        = " << GetLocalUserName() << endl;
-    vout << "Login name  = " << GetLocalLoginName() << endl;
-    vout << "Login Type  = " << GetLocalLoginType() << endl;
+    vout << "Name         = " << GetLocalUserName() << endl;
+    vout << "Login name   = " << GetLocalLoginName() << endl;
+    vout << "Login Type   = " << GetLocalLoginType() << endl;
 
     vout << ">> Local users" << endl;
     vout << "#L    = " << NumOfLocalUsers << endl;
     for(int id=0; id < NumOfLocalUsers; id++){
-    vout << "#Name       = " << GetLocalUserName(id) << endl;
-    vout << "#Login name = " << GetLocalLoginName(id) << endl;
-    vout << "#Login type = = " << GetLocalLoginType(id) << endl;
+    vout << "#Name        = " << GetLocalUserName(id) << endl;
+    vout << "#Login name  = " << GetLocalLoginName(id) << endl;
+    vout << "#Login type  = " << GetLocalLoginType(id) << endl;
     }
 
     vout << ">> Remote users" << endl;
-    vout << "#R    = " << NumOfRemoteUsers << endl;
-    vout << "#RDSK = " << NumOfRDSKRemoteUsers << endl;
-    vout << "#VNC  = " << NumOfVNCRemoteUsers << endl;
+    vout << "#R           = " << NumOfRemoteUsers << endl;
+    vout << "#RDSK        = " << NumOfRDSKRemoteUsers << endl;
+    vout << "#VNC         = " << NumOfVNCRemoteUsers << endl;
     for(int id=0; id < NumOfRemoteUsers; id++){
-    vout << "#Name       = " << GetRemoteUserName(id) << endl;
-    vout << "#Login name = " << GetRemoteLoginName(id) << endl;
-    vout << "#Login type = = " << GetRemoteLoginType(id) << endl;
-    vout << "#Display    = = " << GetRemoteDisplayID(id) << endl;
+    vout << "#Name        = " << GetRemoteUserName(id) << endl;
+    vout << "#Login name  = " << GetRemoteLoginName(id) << endl;
+    vout << "#Login type  = " << GetRemoteLoginType(id) << endl;
+    vout << "#Display     = " << GetRemoteDisplayID(id) << endl;
     }
 }
 
@@ -431,6 +446,14 @@ CSmallString CStatDatagram::GetNodeName(void)
 {
     NodeName[NAME_SIZE-1] = '\0';
     return(NodeName);
+}
+
+//------------------------------------------------------------------------------
+
+CSmallString CStatDatagram::GetFullNodeName(void)
+{
+    FullNodeName[NAME_SIZE-1] = '\0';
+    return(FullNodeName);
 }
 
 //------------------------------------------------------------------------------
