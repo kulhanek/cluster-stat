@@ -410,11 +410,13 @@ void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
 {
     NodesMutex.Lock();
 
+    ofstream ofs("/tmp/node-stat-server-pbs.log");
+
     while( p_node_attrs != NULL ){
         string node_name = string(p_node_attrs->name);
         // get short name
         node_name = node_name.substr(0,node_name.find("."));
-        // DEBUG: cout << "node: " << node_name <<  endl;
+        ofs << "node: " << node_name <<  endl;
         if( Nodes.count(node_name) == 1 ){
             CCompNodePtr node = Nodes[node_name];
             get_attribute(p_node_attrs->attribs,"resources_available","ncpus",node->NCPUs);
@@ -425,12 +427,14 @@ void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
             if( ps == "maintenance" ) status = EPS_MAINTANANCE;
             if( ps == "up" ) status = EPS_UP;
             if( ps == "down" ) status = EPS_DOWN;
-            // DEBUG: cout << "node: " << node_name << " st:" << status <<" (" << ps <<")" << endl;
+            ofs << "node: " << node_name << " st:" << status <<" (" << ps <<")" << endl;
             node->PowerStat = status;
         }
 
         p_node_attrs = p_node_attrs->next;
     }
+
+    ofs.close();
 
     NodesMutex.Unlock();
 }

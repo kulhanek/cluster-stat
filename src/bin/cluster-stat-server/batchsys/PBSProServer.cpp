@@ -105,11 +105,6 @@ bool CPBSProServer::Init(const CSmallString& libs_tok,const CSmallString& server
 
     ServerName = server_name;
 
-    if( ConnectToServer() == false ){
-        ES_TRACE_ERROR("unable to connect to server");
-        return(false);
-    }
-
     return(true);
 }
 

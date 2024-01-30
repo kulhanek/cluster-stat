@@ -40,8 +40,6 @@ private:
     CSmallString    PBSProLibNames;
     CSmallString    PBSServerName;
     int             PoolingTime;
-    int             RessurectionTime;
-    bool            Connected;
 
     // main loop
     virtual void ExecuteThread(void);

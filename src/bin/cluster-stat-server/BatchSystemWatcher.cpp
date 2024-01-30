@@ -36,8 +36,6 @@ using namespace std;
 CBatchSystemWatcher::CBatchSystemWatcher(void)
 {
     PoolingTime         = 20;
-    RessurectionTime    = 120;
-    Connected           = false;
 }
 
 //==============================================================================
@@ -68,16 +66,18 @@ bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElemen
         return(false);
     }
 
+    if( p_config->GetAttribute("PoolingTime",PoolingTime) == true ) {
+        vout << "# PBSPro Pooling Time           = " << PoolingTime << endl;
+    } else {
+        vout << "# PBSPro Pooling Time           = " << PoolingTime << " (default)" << endl;
+    }
+
     // disable kerberos
     setenv("PBSPRO_IGNORE_KERBEROS","yes",1);
 
-    if( PBSPro.Init(PBSProLibNames,PBSServerName) == true ){
-        Connected = true;
-        // DEBUG: cout << "PBS - connected" << endl;
-    } else {
-        ES_WARNING("unable to connect to PBS server");
-        // DEBUG: cout << "PBS - not connected" << endl;
-        return(true);
+    if( PBSPro.Init(PBSProLibNames,PBSServerName) == false ){
+        ES_ERROR("unable to init symbols");
+        return(false);
     }
 
     return(true);
@@ -93,30 +93,11 @@ void CBatchSystemWatcher::ExecuteThread(void)
     setenv("PBSPRO_IGNORE_KERBEROS","yes",1);
 
     while( ! ThreadTerminated ) {
-        if( Connected == false ){
-            // DEBUG: cout << "PBS - ressurect" << endl;
-            sleep(RessurectionTime);
-            if( PBSPro.ConnectToServer() == true ){
-                Connected = true;
-            } else {
-                ES_WARNING("unable to connect to PBS server");
-            }
-            // DEBUG: cout << "pbs - problem" << endl;
-            continue;
+        if( PBSPro.ConnectToServer() == true ){
+            PBSPro.UpdateNodes();
+            PBSPro.DisconnectFromServer();
         }
-
-        // DEBUG: cout << "pbs - here" << endl;
-
-        if( PBSPro.UpdateNodes() == false ){
-            Connected = false;
-            continue;
-        }
-
         sleep(PoolingTime);
-    }
-
-    if( Connected ){
-        PBSPro.DisconnectFromServer();
     }
 }
 

@@ -1,0 +1,13 @@
+[Unit]
+Description=Report logged users to the status server
+Wants=network-online.target
+After=network.target network-online.target local-fs.target
+
+[Service]
+ExecStart=/opt/node-stat-client/3.0/bin/cluster-stat-client wolf.ncbr.muni.cz
+ExecStopPost=/opt/node-stat-client/3.0/bin/cluster-stat-client --shutdown --interval 0 wolf.ncbr.muni.cz
+User=nodestat
+UMask=077
+
+[Install]
+WantedBy=multi-user.target
