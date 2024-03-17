@@ -73,7 +73,9 @@ bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElemen
     }
 
     // disable kerberos
-    setenv("PBSPRO_IGNORE_KERBEROS","yes",1);
+    setenv("PBSPRO_IGNORE_KERBEROS","yes",1);   // PBSPro
+    setenv("PBS_AUTH_METHOD","resvport",1);     // OpenPBS
+    setenv("PBS_ENCRYPT_METHOD","",1);
 
     if( PBSPro.Init(PBSProLibNames,PBSServerName) == false ){
         ES_ERROR("unable to init symbols");
