@@ -72,10 +72,21 @@ bool CBatchSystemWatcher::ProcessBatchSystemControl(CVerboseStr& vout,CXMLElemen
         vout << "# PBSPro Pooling Time           = " << PoolingTime << " (default)" << endl;
     }
 
+    PBSVersion = "PBSPro";
+    if( p_config->GetAttribute("PBSVersion",PBSVersion) == true ) {
+        vout << "# PBS Version                   = " << PBSVersion << endl;
+    } else {
+        vout << "# PBS Version                   = " << PBSVersion << " (default)" << endl;
+    }
+
     // disable kerberos
-    setenv("PBSPRO_IGNORE_KERBEROS","yes",1);   // PBSPro
-    setenv("PBS_AUTH_METHOD","resvport",1);     // OpenPBS
-    setenv("PBS_ENCRYPT_METHOD","",1);
+    if( PBSVersion == "OpenPBS" ){
+        setenv("PBS_AUTH_METHOD","resvport",1);     // OpenPBS
+        setenv("PBS_ENCRYPT_METHOD","",1);
+    }
+    if( PBSVersion == "PBSPro" ){
+        setenv("PBSPRO_IGNORE_KERBEROS","yes",1);   // PBSPro
+    }
 
     if( PBSPro.Init(PBSProLibNames,PBSServerName) == false ){
         ES_ERROR("unable to init symbols");

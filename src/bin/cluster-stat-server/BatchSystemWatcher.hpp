@@ -40,6 +40,7 @@ private:
     CSmallString    PBSProLibNames;
     CSmallString    PBSServerName;
     int             PoolingTime;
+    CSmallString    PBSVersion;     // PBSPro, OpenPBS
 
     // main loop
     virtual void ExecuteThread(void);
