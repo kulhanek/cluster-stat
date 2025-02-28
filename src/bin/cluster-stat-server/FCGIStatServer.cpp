@@ -419,9 +419,12 @@ void CFCGIStatServer::UpdateNodePowerStatus(struct batch_status* p_node_attrs)
         ofs << "node: " << node_name <<  endl;
         if( Nodes.count(node_name) == 1 ){
             CCompNodePtr node = Nodes[node_name];
+            node->NCPUs = 0; // it needs to be initialized as get_attribute can fail
             get_attribute(p_node_attrs->attribs,"resources_available","ncpus",node->NCPUs);
+            node->NGPUs = 0; // it needs to be initialized as get_attribute can fail
             get_attribute(p_node_attrs->attribs,"resources_available","ngpus",node->NGPUs);
             CSmallString ps;
+            ps = "maintenance"; // it needs to be initialized as get_attribute can fail
             get_attribute(p_node_attrs->attribs,"resources_available","power_status",ps);
             EPowerStat status = EPS_UNKNOWN;
             if( ps == "maintenance" ) status = EPS_MAINTANANCE;
