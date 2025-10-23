@@ -6,3 +6,8 @@ DartConfiguration.tcl
 Makefile
 /bin/
 cluster-stat.creator.user
+.qtc_clangd/
+cluster-stat.cflags
+cluster-stat.cxxflags
+*.autosave
+

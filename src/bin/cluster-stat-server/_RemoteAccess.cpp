@@ -37,6 +37,10 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/format.hpp>
 
+//#define _GNU_SOURCE          /* See feature_test_macros(7) */
+#include <fcntl.h>           /* Definition of AT_* constants */
+#include <sys/stat.h>
+
 using namespace std;
 using namespace boost;
 
@@ -285,7 +289,7 @@ bool CFCGIStatServer::_RemoteAccessList(CFCGIRequest& request)
         if( (status != "poweron") && (status != "down") && (status != "maintenance") ) {
             diff = ctime.GetSecondsFromBeginning() - node->StartVNCTime;
             if( node->InStartVNCMode ){
-                if( diff < 60 ){
+                if( diff < 90 ){
                     status = "startvnc";
                 } else {
                     node->InStartVNCMode = false;
@@ -423,7 +427,21 @@ bool CFCGIStatServer::IsSocketLive(const CSmallString& socket)
         pclose(p_sf);
     }
 
-    return(isactive);
+    if( isactive == false ) return(false);
+
+    // wait until the RDSK is fully initialized
+    struct statx stx;
+    if( statx(0,socket,0,STATX_ALL,&stx) != 0 ) return(false);
+
+    CSmallTimeAndDate ctime;
+    ctime.GetActualTimeAndDate();
+
+    if( ctime.GetSecondsFromBeginning() - stx.stx_btime.tv_sec < 30 ){
+        // too young
+        return(false);
+    }
+
+    return(true);
 }
 
 //------------------------------------------------------------------------------
